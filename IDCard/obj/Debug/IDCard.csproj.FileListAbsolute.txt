@@ -1,0 +1,6 @@
+C:\Users\yumas\Desktop\ReceiveCardAIO\IDCard\bin\Debug\IDCard.dll
+C:\Users\yumas\Desktop\ReceiveCardAIO\IDCard\bin\Debug\IDCard.pdb
+C:\Users\yumas\Desktop\ReceiveCardAIO\IDCard\obj\Debug\IDCard.csprojAssemblyReference.cache
+C:\Users\yumas\Desktop\ReceiveCardAIO\IDCard\obj\Debug\IDCard.csproj.CoreCompileInputs.cache
+C:\Users\yumas\Desktop\ReceiveCardAIO\IDCard\obj\Debug\IDCard.dll
+C:\Users\yumas\Desktop\ReceiveCardAIO\IDCard\obj\Debug\IDCard.pdb

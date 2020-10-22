@@ -1,0 +1,5 @@
+C:\Users\yumas\Desktop\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.csproj.CoreCompileInputs.cache
+C:\Users\yumas\Desktop\ReceiveCardAIO\ArcFaceSharp\bin\Debug\ArcFaceSharp.dll
+C:\Users\yumas\Desktop\ReceiveCardAIO\ArcFaceSharp\bin\Debug\ArcFaceSharp.pdb
+C:\Users\yumas\Desktop\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.dll
+C:\Users\yumas\Desktop\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.pdb

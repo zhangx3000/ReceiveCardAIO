@@ -1,0 +1,6 @@
+C:\Users\yumas\Desktop\ReceiveCardAIO\CRCXMODEM\bin\Debug\CRCXMODEM.dll
+C:\Users\yumas\Desktop\ReceiveCardAIO\CRCXMODEM\bin\Debug\CRCXMODEM.pdb
+C:\Users\yumas\Desktop\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.csprojAssemblyReference.cache
+C:\Users\yumas\Desktop\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.csproj.CoreCompileInputs.cache
+C:\Users\yumas\Desktop\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.dll
+C:\Users\yumas\Desktop\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.pdb
