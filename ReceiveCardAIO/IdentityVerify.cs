@@ -28,6 +28,9 @@ namespace ReceiveCardAIO
         private IntPtr pVideoEngine = IntPtr.Zero;
         //视频引擎 FR Handle 处理   FR和图片引擎分开，减少强占引擎的问题
         private IntPtr pVideoImageEngine = IntPtr.Zero;
+
+        private IntPtr pVideoRGBImageEngine = IntPtr.Zero;//RGB活体检测
+
         // 视频输入设备信息
         private FilterInfoCollection filterInfoCollection;
         private VideoCaptureDevice deviceVideo;
@@ -133,6 +136,16 @@ namespace ReceiveCardAIO
             combinedMask = FaceEngineMask.ASF_FACERECOGNITION | FaceEngineMask.ASF_FACE3DANGLE;
             retCode = ASFFunctions.ASFInitEngine(detectMode, detectFaceOrientPriority, detectFaceScaleVal, detectFaceMaxNum, combinedMask, ref pVideoImageEngine);
             Console.WriteLine("InitVideoEngine Result:" + retCode);
+
+
+
+            //RGB视频专用FR引擎
+            detectFaceMaxNum = 1;
+            combinedMask = FaceEngineMask.ASF_FACE_DETECT | FaceEngineMask.ASF_FACERECOGNITION | FaceEngineMask.ASF_LIVENESS;
+            retCode = ASFFunctions.ASFInitEngine(detectMode, detectFaceOrientPriority, detectFaceScaleVal, detectFaceMaxNum, combinedMask, ref pVideoRGBImageEngine);
+
+
+
             if (retCode == 0)
             {
                 lbl_msg.Text = ("视频专用FR引擎初始化成功!\n");
@@ -273,41 +286,68 @@ namespace ReceiveCardAIO
                             int result = (CompareTwoFeatures(feature, idCardHelper.idInfo.imageFeature) >= threshold) ? 1 : -1;
                             if (result > -1)
                             {
-                                //存放当前人脸识别的相似度
-                                idCardHelper.idInfo.similarity = similarity;
-                                //记录下当前的摄像头的人脸抓拍照
-                                idCardHelper.idInfo.capImage = bitmap;
-                                //标志人脸比对验证通过
-                                //faceState = true;
-                                //验证通过则不再是当前身份证，等待下一次身份证
-                                idCardHelper.idInfo.isRight = false;
-                                //在子线程中输出信息到messageBox
-                                AppendText p = new AppendText(AddTextToMessBox);
-                                lbl_msg.Invoke(p, "人脸验证成功，请通过闸机...\n");
-                                //最终通过闸机
-                                pass = 1;
-                                //以人脸识别的方式通过闸机
-                                idCardHelper.idInfo.isPass = 1;
-                                /*
-                                 *通信部分，将内存中的数据存放到数据库中
-                                 */
-                                //将身份证数据传入到服务器上
-                                //sendMessageToServer();
+                                bool isLiveness = false;
+                                //调整图片数据，非常重要
+                                ImageInfo imageInfo = ImageUtil.ReadBMP(bitmap);
+                                if (imageInfo == null)
+                                {
+                                    return;
+                                }
+                                int retCode_Liveness = -1;
+                                //RGB活体检测
+                                ASF_LivenessInfo liveInfo = FaceUtil.LivenessInfo_RGB(pVideoRGBImageEngine, imageInfo, multiFaceInfo, out retCode_Liveness);
+                                //判断检测结果
+                                if (retCode_Liveness == 0 && liveInfo.num > 0)
+                                {
+                                    int isLive = MemoryUtil.PtrToStructure<int>(liveInfo.isLive);
+                                    isLiveness = (isLive == 1) ? true : false;
+                                }
+                                if (isLiveness)
+                                {
+                                    //存放当前人脸识别的相似度
+                                    idCardHelper.idInfo.similarity = similarity;
+                                    //记录下当前的摄像头的人脸抓拍照
+                                    idCardHelper.idInfo.capImage = bitmap;
+                                    //标志人脸比对验证通过
+                                    //faceState = true;
+                                    //验证通过则不再是当前身份证，等待下一次身份证
+                                    idCardHelper.idInfo.isRight = false;
+                                    //在子线程中输出信息到messageBox
+                                    AppendText p = new AppendText(AddTextToMessBox);
+                                    lbl_msg.Invoke(p, "人脸验证成功，请通过闸机...\n");
+                                    //最终通过闸机
+                                    pass = 1;
+                                    //以人脸识别的方式通过闸机
+                                    idCardHelper.idInfo.isPass = 1;
+                                    /*
+                                     *通信部分，将内存中的数据存放到数据库中
+                                     */
+                                    //将身份证数据传入到服务器上
+                                    //sendMessageToServer();
 
-                                //将比对结果放到显示消息中，用于最新显示
-                                trackUnit.message = string.Format("通过验证，相似度为{0}", similarity);
-                                FileHelper.DeleteFile(m_strPath);   //删除验证过的本地文件
-                                //延时1秒
-                                Thread.Sleep(2000);
-                                //照片恢复默认照片
-                                this.IDPbox.Image = defaultImage;
-                                trackUnit.message = "";//人脸识别框文字置空
-                                setFormResultValue(true);
+                                    //将比对结果放到显示消息中，用于最新显示
+                                    trackUnit.message = string.Format("通过验证，相似度为{0}", similarity);
+                                    FileHelper.DeleteFile(m_strPath);   //删除验证过的本地文件
+                                                                        //延时1秒
+                                    Thread.Sleep(1000);
+                                    //照片恢复默认照片
+                                    this.IDPbox.Image = defaultImage;
+                                    trackUnit.message = "";//人脸识别框文字置空
+                                    setFormResultValue(true);
+                                }
+                                else
+                                {
+                                    pass = 0;//标志未通过
+                                    trackUnit.message = "未通过，系统识别为照片";
+                                    AppendText p = new AppendText(AddTextToMessBox);
+                                    lbl_msg.Invoke(p, "抱歉，系统识别为照片...\n");
+                                    FileHelper.DeleteFile(m_strPath);//删除验证过的本地文件
+                                }
                             }
                             else
                             {
                                 pass = 0;//标志未通过
-                                //重置显示消息
+                                         //重置显示消息
                                 trackUnit.message = "未通过人脸验证";
                                 AppendText p = new AppendText(AddTextToMessBox);
                                 lbl_msg.Invoke(p, "抱歉，您未通过人脸验证...\n");
@@ -374,6 +414,11 @@ namespace ReceiveCardAIO
             //销毁引擎
             retCode = ASFFunctions.ASFUninitEngine(pVideoImageEngine);
             Console.WriteLine("UninitEngine pVideoImageEngine Result:" + retCode);
+
+            //销毁引擎
+            retCode = ASFFunctions.ASFUninitEngine(pVideoRGBImageEngine);
+            Console.WriteLine("UninitEngine pVideoRGBImageEngine Result:" + retCode);
+
 
             if (videoSource.IsRunning)
             {

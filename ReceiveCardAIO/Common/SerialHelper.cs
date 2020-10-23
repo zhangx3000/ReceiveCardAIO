@@ -39,8 +39,6 @@ namespace ReceiveCardAIO.Common
             {
                 Console.WriteLine("串口打开失败");
             }
-
-
         }
         /// <summary>
         /// 发送线程
@@ -51,7 +49,6 @@ namespace ReceiveCardAIO.Common
         {
             byte[] cmdByteArr = StrCommon.GetByteArrayByHexStr(comStr);
             port.Write(cmdByteArr, 0, cmdByteArr.Length);
-            //Console.WriteLine("发送线程-" + cmdName + ":" + cmd);
         }
     }
 }

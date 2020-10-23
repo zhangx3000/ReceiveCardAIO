@@ -438,5 +438,111 @@ namespace ArcFaceSharp.Util
             }
             return singleFaceInfo;
         }
+
+        /// <summary>
+        /// RGB活体检测
+        /// </summary>
+        /// <param name="pEngine">引擎Handle</param>
+        /// <param name="imageInfo">图像数据</param>
+        /// <param name="multiFaceInfo">活体检测结果</param>
+        /// <param name="retCode"></param>
+        /// <returns>保存活体检测结果结构体</returns>
+
+        public static ASF_LivenessInfo LivenessInfo_RGB(IntPtr pEngine,ImageInfo imageInfo,ASF_MultiFaceInfo multiFaceInfo,out int retCode)
+        {
+            IntPtr pMultiFaceInfo = MemoryUtil.Malloc(MemoryUtil.SizeOf<ASF_MultiFaceInfo>());
+            MemoryUtil.StructureToPtr(multiFaceInfo, pMultiFaceInfo);
+            if (multiFaceInfo.faceNum == 0)
+            {
+                retCode = -1;
+                //释放内存
+                MemoryUtil.Free(pMultiFaceInfo);
+                return new ASF_LivenessInfo();
+            }
+            try
+            {
+                //人脸信息处理
+                retCode = ASFFunctions.ASFProcess(pEngine, imageInfo.width, imageInfo.height, imageInfo.format, imageInfo.imgData, pMultiFaceInfo, FaceEngineMask.ASF_LIVENESS);
+                if(retCode==0)
+                {
+                    //获取活体检测结果
+                    IntPtr pLivenessInfo = MemoryUtil.Malloc(MemoryUtil.SizeOf<ASF_LivenessInfo>());
+                    retCode = ASFFunctions.ASFGetLivenessScore(pEngine, pLivenessInfo);
+                    Console.WriteLine("Get Liveness Result:" + retCode);
+                    ASF_LivenessInfo livenessInfo = MemoryUtil.PtrToStructure<ASF_LivenessInfo>(pLivenessInfo);
+                    //释放内存
+                    MemoryUtil.Free(pMultiFaceInfo);
+                    MemoryUtil.Free(pLivenessInfo);
+                    return livenessInfo;
+                }
+                else
+                {
+                    //释放内存
+                    MemoryUtil.Free(pMultiFaceInfo);
+                    return new ASF_LivenessInfo();
+                }
+            }
+            catch
+            {
+                retCode = -1;
+                //释放内存
+                MemoryUtil.Free(pMultiFaceInfo);
+                return new ASF_LivenessInfo();
+            }
+        }
+
+        /// <summary>
+        /// 红外活体检测
+        /// </summary>
+        /// <param name="pEngine">引擎Handle</param>
+        /// <param name="imageInfo">图像数据</param>
+        /// <param name="multiFaceInfo">活体检测结果</param>
+        /// <returns>保存活体检测结果结构体</returns>
+        public static ASF_LivenessInfo LivenessInfo_IR(IntPtr pEngine, ImageInfo imageInfo, ASF_MultiFaceInfo multiFaceInfo, out int retCode)
+        {
+            IntPtr pMultiFaceInfo = MemoryUtil.Malloc(MemoryUtil.SizeOf<ASF_MultiFaceInfo>());
+            MemoryUtil.StructureToPtr(multiFaceInfo, pMultiFaceInfo);
+
+            if (multiFaceInfo.faceNum == 0)
+            {
+                retCode = -1;
+                //释放内存
+                MemoryUtil.Free(pMultiFaceInfo);
+                return new ASF_LivenessInfo();
+            }
+
+            try
+            {
+                //人脸信息处理
+                retCode = ASFFunctions.ASFProcess_IR(pEngine, imageInfo.width, imageInfo.height, imageInfo.format, imageInfo.imgData, pMultiFaceInfo, FaceEngineMask.ASF_IR_LIVENESS);
+                if (retCode == 0)
+                {
+                    //获取活体检测结果
+                    IntPtr pLivenessInfo = MemoryUtil.Malloc(MemoryUtil.SizeOf<ASF_LivenessInfo>());
+                    retCode = ASFFunctions.ASFGetLivenessScore_IR(pEngine, pLivenessInfo);
+                    Console.WriteLine("Get Liveness Result:" + retCode);
+                    ASF_LivenessInfo livenessInfo = MemoryUtil.PtrToStructure<ASF_LivenessInfo>(pLivenessInfo);
+
+                    //释放内存
+                    MemoryUtil.Free(pMultiFaceInfo);
+                    MemoryUtil.Free(pLivenessInfo);
+                    return livenessInfo;
+                }
+                else
+                {
+                    //释放内存
+                    MemoryUtil.Free(pMultiFaceInfo);
+                    return new ASF_LivenessInfo();
+                }
+            }
+            catch
+            {
+                retCode = -1;
+                //释放内存
+                MemoryUtil.Free(pMultiFaceInfo);
+                return new ASF_LivenessInfo();
+            }
+        }
+
     }
 }

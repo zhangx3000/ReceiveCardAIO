@@ -8,7 +8,6 @@ namespace ArcFaceSharp.SDKAPI
     /// </summary>
     public class ASFFunctions
     {
-
         /// <summary>
         /// SDK动态链接库路径
         /// </summary>
@@ -116,6 +115,36 @@ namespace ArcFaceSharp.SDKAPI
         [DllImport(Dll_PATH, CallingConvention = CallingConvention.Cdecl)]
         public static extern int ASFGetFace3DAngle(IntPtr pEngine, IntPtr p3DAngleInfo);
 
+
+        /// <summary>
+        /// 获取RGB活体结果
+        /// </summary>
+        /// <param name="hEngine">引擎handle</param>
+        /// <param name="livenessInfo">活体检测信息</param>
+        /// <returns>调用结果</returns>
+        [DllImport(Dll_PATH, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ASFGetLivenessScore(IntPtr hEngine, IntPtr livenessInfo);
+        /// <summary>
+        /// 该接口目前仅支持单人脸IR活体检测（不支持年龄、性别、3D角度的检测），默认取第一张人脸
+        /// </summary>
+        /// <param name="pEngine">引擎handle</param>
+        /// <param name="width">图片宽度</param>
+        /// <param name="height">图片高度</param>
+        /// <param name="format">颜色空间格式</param>
+        /// <param name="imgData">图片数据</param>
+        /// <param name="faceInfo">人脸信息，用户根据待检测的功能选择需要使用的人脸。</param>
+        /// <param name="combinedMask">目前只支持传入ASF_IR_LIVENESS属性的传入，且初始化接口需要传入 </param>
+        /// <returns></returns>
+        [DllImport(Dll_PATH, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ASFProcess_IR(IntPtr pEngine, int width, int height, int format, IntPtr imgData, IntPtr faceInfo, int combinedMask);
+        /// <summary>
+        /// 获取IR活体结果
+        /// </summary>
+        /// <param name="pEngine">引擎handle</param>
+        /// <param name="irLivenessInfo">检测到IR活体结果</param>
+        /// <returns></returns>
+        [DllImport(Dll_PATH, CallingConvention = CallingConvention.Cdecl)]
+        public static extern int ASFGetLivenessScore_IR(IntPtr pEngine, IntPtr irLivenessInfo);
 
         /// <summary>
         /// 销毁引擎

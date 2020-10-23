@@ -47,6 +47,7 @@
     <Compile Include="Model\ASF_FaceFeature.cs" />
     <Compile Include="Model\ASF_GenderInfo.cs" />
     <Compile Include="Model\ASF_ImagePixelFormat.cs" />
+    <Compile Include="Model\ASF_LivenessInfo.cs" />
     <Compile Include="Model\ASF_MultiFaceInfo.cs" />
     <Compile Include="Model\ASF_OrientCode.cs" />
     <Compile Include="Model\ASF_OrientPriority.cs" />

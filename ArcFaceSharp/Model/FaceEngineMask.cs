@@ -31,5 +31,13 @@ namespace ArcFaceSharp.Model
         /// 3D角度检测方法类型常量
         /// </summary>
         public const int ASF_FACE3DANGLE = 0x00000020;
+        /// <summary>
+        /// 检测活体
+        /// </summary>
+        public const int ASF_LIVENESS = 0x00000080;
+        /// <summary>
+        /// 红外活体
+        /// </summary>
+        public const int ASF_IR_LIVENESS = 0x00000400;
     }
 }

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CRCXMODEM;
+using ReceiveCardAIO.Common;
+using System;
 using System.Windows.Forms;
 
 namespace ReceiveCardAIO
@@ -37,8 +32,8 @@ namespace ReceiveCardAIO
             {
                 try
                 {
+                    //MessageBox.Show(FunLib.将卡移到出卡口持卡位);
                     //SerialHelper.ExCommand(FunLib.将卡移到出卡口持卡位);
-
                     Console.WriteLine("发卡成功");
                     idvForm.Close();
                 }
@@ -46,7 +41,6 @@ namespace ReceiveCardAIO
                 {
                     throw ex;
                 }
-
             }
         }
 
@@ -57,8 +51,7 @@ namespace ReceiveCardAIO
         /// <param name="e"></param>
         private void btn_Receive_Click(object sender, EventArgs e)
         {
-
+            Console.WriteLine("回收卡成功");
         }
-        
     }
 }
