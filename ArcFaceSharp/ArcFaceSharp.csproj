@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{73658569-DA48-4279-A115-163EB52D8582}</ProjectGuid>
+    <ProjectGuid>{A6C33D98-7B54-46C7-AD3C-9740D327D65D}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ArcFaceSharp</RootNamespace>
@@ -42,19 +42,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ArcFaceCore.cs" />
-    <Compile Include="ArcFace\ArcFaceApi.cs" />
-    <Compile Include="ArcFace\ArcFaceConstants.cs" />
-    <Compile Include="ArcFace\ArcFaceEnums.cs" />
-    <Compile Include="ArcFace\ArcFaceStructs.cs" />
-    <Compile Include="Exceptions\ResultCodeException.cs" />
-    <Compile Include="Extensions\IntPtrExtensions.cs" />
-    <Compile Include="Image\ImageData.cs" />
-    <Compile Include="Image\ImageDataConverter.cs" />
-    <Compile Include="Model\Face3DAngleModel.cs" />
-    <Compile Include="Model\MultiFaceModel.cs" />
-    <Compile Include="Model\SingleFaceModel.cs" />
+    <Compile Include="Model\ASF_AgeInfo.cs" />
+    <Compile Include="Model\ASF_Face3DAngle.cs" />
+    <Compile Include="Model\ASF_FaceFeature.cs" />
+    <Compile Include="Model\ASF_GenderInfo.cs" />
+    <Compile Include="Model\ASF_ImagePixelFormat.cs" />
+    <Compile Include="Model\ASF_MultiFaceInfo.cs" />
+    <Compile Include="Model\ASF_OrientCode.cs" />
+    <Compile Include="Model\ASF_OrientPriority.cs" />
+    <Compile Include="Model\ASF_SingleFaceInfo.cs" />
+    <Compile Include="Model\ASF_VERSION.cs" />
+    <Compile Include="Model\DetectionMode.cs" />
+    <Compile Include="Model\FaceEngineMask.cs" />
+    <Compile Include="Model\FaceTrackUnit.cs" />
+    <Compile Include="Model\ImageInfo.cs" />
+    <Compile Include="Model\MRECT.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SDKAPI\ASFFunctions.cs" />
+    <Compile Include="Util\FaceUtil.cs" />
+    <Compile Include="Util\ImageUtil.cs" />
+    <Compile Include="Util\MemoryUtil.cs" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

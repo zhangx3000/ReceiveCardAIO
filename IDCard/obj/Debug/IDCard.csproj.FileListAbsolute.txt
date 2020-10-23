@@ -1,6 +1,9 @@
-C:\Users\yumas\Desktop\ReceiveCardAIO\IDCard\bin\Debug\IDCard.dll
-C:\Users\yumas\Desktop\ReceiveCardAIO\IDCard\bin\Debug\IDCard.pdb
-C:\Users\yumas\Desktop\ReceiveCardAIO\IDCard\obj\Debug\IDCard.csprojAssemblyReference.cache
-C:\Users\yumas\Desktop\ReceiveCardAIO\IDCard\obj\Debug\IDCard.csproj.CoreCompileInputs.cache
-C:\Users\yumas\Desktop\ReceiveCardAIO\IDCard\obj\Debug\IDCard.dll
-C:\Users\yumas\Desktop\ReceiveCardAIO\IDCard\obj\Debug\IDCard.pdb
+C:\Users\yumas\Desktop\FaceId\IDCard\obj\Debug\IDCard.csprojAssemblyReference.cache
+C:\Users\yumas\Desktop\FaceId\IDCard\obj\Debug\IDCard.csproj.CoreCompileInputs.cache
+C:\Users\yumas\Desktop\FaceId\IDCard\bin\Debug\IDCard.dll
+C:\Users\yumas\Desktop\FaceId\IDCard\bin\Debug\IDCard.pdb
+C:\Users\yumas\Desktop\FaceId\IDCard\bin\Debug\ArcFaceSharp.dll
+C:\Users\yumas\Desktop\FaceId\IDCard\bin\Debug\ArcFaceSharp.pdb
+C:\Users\yumas\Desktop\FaceId\IDCard\obj\Debug\IDCard.csproj.CopyComplete
+C:\Users\yumas\Desktop\FaceId\IDCard\obj\Debug\IDCard.dll
+C:\Users\yumas\Desktop\FaceId\IDCard\obj\Debug\IDCard.pdb

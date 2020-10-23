@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{EEF511C1-C69A-4342-BD88-2150ACB6279B}</ProjectGuid>
+    <ProjectGuid>{562392ED-907E-406C-93E7-804764EE0702}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>IDCard</RootNamespace>
@@ -44,7 +44,14 @@
   <ItemGroup>
     <Compile Include="IDCardHelper.cs" />
     <Compile Include="IDCardLib.cs" />
+    <Compile Include="Model\IDCardInfo.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ArcFaceSharp\ArcFaceSharp.csproj">
+      <Project>{A6C33D98-7B54-46C7-AD3C-9740D327D65D}</Project>
+      <Name>ArcFaceSharp</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

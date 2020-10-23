@@ -1,319 +1,387 @@
-﻿using ArcFaceSharp;
-using ArcFaceSharp.ArcFace;
-using ArcFaceSharp.Image;
+﻿using AForge.Video.DirectShow;
 using ArcFaceSharp.Model;
+using ArcFaceSharp.SDKAPI;
+using ArcFaceSharp.Util;
 using IDCard;
-using OpenCvSharp;
-using OpenCvSharp.Extensions;
 using ReceiveCardAIO.Common;
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.Configuration;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace ReceiveCardAIO
 {
     // 第一步：声明一个委托。（根据自己的需求）
-    public delegate void setTextValue(bool textValue);
-
+    public delegate void setResultValue(bool retValue);
     public partial class IdentityVerify : Form
     {
-        private static bool bPlayFlag = false;
-        private static VideoCapture m_vCapture;
-        private static Thread ThreadCam;//摄像头视频播放线程
-        private static Thread ThreadVerify;//人脸识别线程
-        private static string PicSavePath = AppDomain.CurrentDomain.BaseDirectory + @"Avatar\";
+        //==========图片引擎Handle
+        private IntPtr pImageEngine = IntPtr.Zero;
+        //相似度  阈值设置为0.8
+        private float threshold = 0.7f;
+        //默认显示的照片
+        private Image defaultImage;
 
-        //人脸追踪引擎
-        private static string APPID;
-        private static string FT_SDKKEY;
-        private ArcFaceCore arcFace;//人脸追踪
-        private ArcFaceCore arcFaceImg;//人脸比对
+        //==========视频引擎Handle
+        //视频引擎Handle
+        private IntPtr pVideoEngine = IntPtr.Zero;
+        //视频引擎 FR Handle 处理   FR和图片引擎分开，减少强占引擎的问题
+        private IntPtr pVideoImageEngine = IntPtr.Zero;
+        // 视频输入设备信息
+        private FilterInfoCollection filterInfoCollection;
+        private VideoCaptureDevice deviceVideo;
+        //摄像头每一帧的画面的信息。
+        private FaceTrackUnit trackUnit = new FaceTrackUnit();
+        //定义特定的文本格式，包括字体、字号和样式特性。
+        private Font font = new Font(FontFamily.GenericSerif, 10f);
+        // 定义一种颜色的画笔。 画笔用于填充图形形状，如矩形、 椭圆、 饼、 多边形和路径。
+        private SolidBrush brush = new SolidBrush(Color.Red);
+        //定义用于绘制直线和曲线的对象。
+        private Pen pen = new Pen(Color.Red);
+        //下面用于同步的锁变量
+        private bool isLock = false;
 
-        private Bitmap imgCaptureBmpTemp;
-        private Bitmap imgIdCardBmpTemp;
+        /*
+         * 人脸验证的相关参数
+         */
+        //人脸识别的次数,大于三次还没有匹配成功就要进行额外的验证
+        private int recTimes = 8;
+        //检测人脸比对的结果是否通过
+        //private bool faceState = false;
+        //检测是否要停止人脸检测
+        private bool faceStop = false;
+        //是否通过闸机
+        private int pass = 0; //0 没有通过 1 人脸通过
 
 
-        private IDCardHelper idCardHelper;
+        //=====身份证相关
+        //身份证识别帮助类
+        public IDCardHelper idCardHelper;
+        //可执行程序所在的目录
+        private string m_strPath;
+
+        //在线程中向lbl_msg中添加信息的委托
+        private delegate void AppendText(string text);
+        private void AddTextToMessBox(string text)
+        {
+            lbl_msg.Text = (string.Format(text));
+        }
+
 
         //第二步：声明一个委托类型的事件
-        public event setTextValue setFormTextValue;
-
-        public IdentityVerify()
+        public event setResultValue setFormResultValue;
+        /// <summary>
+        /// 激活并初始化引擎
+        /// </summary>
+        private void ActiveAndInitEngines()
         {
-            System.Windows.Forms.Control.CheckForIllegalCrossThreadCalls = false;
-            InitializeComponent();
-            //读取配置文件
+            //读取配置文件中的 APP_ID 和 SDKKEY
             AppSettingsReader reader = new AppSettingsReader();
-            APPID = (string)reader.GetValue("APP_ID", typeof(string));
-            FT_SDKKEY = (string)reader.GetValue("SDKKEY", typeof(string));
-            if (string.IsNullOrWhiteSpace(APPID) || string.IsNullOrWhiteSpace(FT_SDKKEY))
-            {
-                MessageBox.Show("请在App.config配置文件中先配置APP_ID和SDKKEY64!");
-                return;
-            }
+            string appId = (string)reader.GetValue("APP_ID", typeof(string));
+            string sdkKey = (string)reader.GetValue("SDKKEY", typeof(string));
+            int retCode = 0;
+            //激活引擎    
             try
             {
-                //激活引擎    如出现错误，1.请先确认从官网下载的sdk库已放到对应的bin中，2.当前选择的CPU为x86或者x64
-                // 创建 ArcFaceCore 对象，向构造函数传入相关参数进行 ArcFace 引擎的初始化
-                arcFace = new ArcFaceCore(APPID, FT_SDKKEY, ArcFaceDetectMode.VIDEO,
-                    ArcFaceFunction.FACE_DETECT | ArcFaceFunction.FACE_RECOGNITION | ArcFaceFunction.AGE | ArcFaceFunction.FACE_3DANGLE | ArcFaceFunction.GENDER, DetectionOrientPriority.ASF_OP_0_ONLY, 1, 16);
-
-                if(string.IsNullOrWhiteSpace(arcFace.VersionInfo.Version))
-                {
-                    MessageBox.Show(string.Format("人脸追踪引擎初始化失败"), "错误提示", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                OpenCamera();//打开摄像头
-
-                idCardHelper = new IDCardHelper();
-                idCardHelper.GetAvatarInfo();//身份证识别,获取身份证头像
+                retCode = ASFFunctions.ASFActivation(appId, sdkKey);
             }
             catch (Exception ex)
             {
-                if (ex.Message.IndexOf("无法加载 DLL") > -1)
-                {
-                    MessageBox.Show("请将sdk相关DLL放入bin对应的x86或x64下的文件夹中!");
-                }
-                else
-                {
-                    MessageBox.Show("激活引擎失败!");
-                }
+                //异常处理
                 return;
             }
-        }
-
-        /// <summary>
-        /// 打开摄像头
-        /// </summary>
-        private void OpenCamera()
-        {
-            if (!bPlayFlag)
+            #region 图片引擎pImageEngine初始化
+            //初始化引擎
+            uint detectMode = DetectionMode.ASF_DETECT_MODE_IMAGE;
+            //检测脸部的角度优先值
+            int detectFaceOrientPriority = ASF_OrientPriority.ASF_OP_0_HIGHER_EXT;
+            //人脸在图片中所占比例，如果需要调整检测人脸尺寸请修改此值，有效数值为2-32
+            int detectFaceScaleVal = 16;
+            //最大需要检测的人脸个数
+            int detectFaceMaxNum = 5;
+            //引擎初始化时需要初始化的检测功能组合
+            int combinedMask = FaceEngineMask.ASF_FACE_DETECT | FaceEngineMask.ASF_FACERECOGNITION | FaceEngineMask.ASF_AGE | FaceEngineMask.ASF_GENDER | FaceEngineMask.ASF_FACE3DANGLE;
+            //初始化引擎，正常值为0，其他返回值请参考http://ai.arcsoft.com.cn/bbs/forum.php?mod=viewthread&tid=19&_dsign=dbad527e
+            retCode = ASFFunctions.ASFInitEngine(detectMode, detectFaceOrientPriority, detectFaceScaleVal, detectFaceMaxNum, combinedMask, ref pImageEngine);
+            if (retCode == 0)
             {
-                m_vCapture = new VideoCapture(VideoCaptureAPIs.ANY.GetHashCode());
-                if(!m_vCapture.IsOpened())
-                {
-                    MessageBox.Show("摄像头打不开", "摄像头故障", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-                m_vCapture.Set(VideoCaptureProperties.FrameWidth, 550);//宽度
-                m_vCapture.Set(VideoCaptureProperties.FrameHeight, 425);//高度
-
-                bPlayFlag = true;
-                ThreadCam = new Thread(PlayCamera);
-                ThreadCam.Start();
-
-                ThreadVerify = new Thread(VerifyAvatar);
-                ThreadVerify.Start();
+                lbl_msg.Text=("图片引擎初始化成功!\n");
             }
             else
             {
-                bPlayFlag = false;
-                ThreadCam.Abort();
-                ThreadVerify.Abort();
-                m_vCapture.Release();
+                lbl_msg.Text = (string.Format("图片引擎初始化失败!错误码为:{0}\n", retCode));
             }
+            #endregion
+
+            #region 初始化视频模式下人脸检测引擎
+            uint detectModeVideo = DetectionMode.ASF_DETECT_MODE_VIDEO;
+            int combinedMaskVideo = FaceEngineMask.ASF_FACE_DETECT | FaceEngineMask.ASF_FACERECOGNITION;
+            retCode = ASFFunctions.ASFInitEngine(detectModeVideo, detectFaceOrientPriority, detectFaceScaleVal, detectFaceMaxNum, combinedMaskVideo, ref pVideoEngine);
+            if (retCode == 0)
+            {
+                lbl_msg.Text=("视频引擎初始化成功!\n");
+            }
+            else
+            {
+                lbl_msg.Text = (string.Format("视频引擎初始化失败!错误码为:{0}\n", retCode));
+            }
+            #endregion
+
+            #region 视频专用FR引擎
+            detectFaceMaxNum = 1;
+            combinedMask = FaceEngineMask.ASF_FACERECOGNITION | FaceEngineMask.ASF_FACE3DANGLE;
+            retCode = ASFFunctions.ASFInitEngine(detectMode, detectFaceOrientPriority, detectFaceScaleVal, detectFaceMaxNum, combinedMask, ref pVideoImageEngine);
+            Console.WriteLine("InitVideoEngine Result:" + retCode);
+            if (retCode == 0)
+            {
+                lbl_msg.Text = ("视频专用FR引擎初始化成功!\n");
+            }
+            else
+            {
+                lbl_msg.Text = (string.Format("视频专业FR引擎初始化失败!错误码为:{0}\n", retCode));
+            }
+            // 摄像头初始化
+            filterInfoCollection = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+            lbl_msg.Text = (string.Format("摄像头初始化完成...\n"));
+            #endregion
         }
         /// <summary>
-        /// 摄像头播放线程
+        /// 开启摄像头
         /// </summary>
-        private void PlayCamera()
+        private void StartVideo()
         {
-            while(bPlayFlag)
+            //必须保证有可用摄像头
+            if (filterInfoCollection.Count == 0)
             {
-                Mat cFrame = new Mat();
-                try
+                lbl_msg.Text = ("未检测到摄像头，请确保已安装摄像头或驱动!");
+            }
+            if (videoSource.IsRunning)
+            {
+                videoSource.SignalToStop(); //关闭摄像头
+                videoSource.Hide();
+            }
+            else
+            {
+                videoSource.Show();
+                deviceVideo = new VideoCaptureDevice(filterInfoCollection[0].MonikerString);
+                deviceVideo.VideoResolution = deviceVideo.VideoCapabilities[0];
+                videoSource.VideoSource = deviceVideo;
+                videoSource.Start();
+            }
+        }
+
+        public IdentityVerify()
+        {
+            InitializeComponent();
+            //存放可执行文件所在的目录
+            m_strPath = Application.StartupPath;
+            //让其他线程也可以使用UI主线程的控件
+            Control.CheckForIllegalCrossThreadCalls = false;
+            //从摄像头提取图像与身份证证件照进行比对的操作
+            ActiveAndInitEngines();
+            //设置默认照片
+            string filename = m_strPath + @"\default.jpg";
+            defaultImage = Image.FromFile(filename);
+            this.IDPbox.Image = defaultImage;
+        }
+        /// <summary>
+        /// 视频流渲染事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void videoSource_Paint(object sender, PaintEventArgs e)
+        {
+            //能够读到身份证信息 和 视频信息   这个判断很重要
+            if (videoSource.IsRunning && (idCardHelper.idInfo != null) && (idCardHelper.idInfo.isRight == true))
+            {
+                this.IDPbox.Image = idCardHelper.idInfo.image;
+
+                this.lbl_idInfo.Text = idCardHelper.idInfo.name + "\r\n" + idCardHelper.idInfo.sex + "\r\n" + idCardHelper.idInfo.nation + "\r\n" +
+                    idCardHelper.idInfo.address + "\r\n" + idCardHelper.idInfo.ID + "\r\n" + idCardHelper.idInfo.org + "\r\n" + idCardHelper.idInfo.vaildity;
+
+                while ((!faceStop) && (recTimes >= 0))  //只检测8帧人脸
                 {
-                    m_vCapture.Read(cFrame);
-                    int sleepTime = (int)Math.Round(1000 / m_vCapture.Fps);
-                    Cv2.WaitKey(sleepTime);
-                    if(cFrame.Empty())
+                    //得到当前摄像头下的图片
+                    Bitmap bitmap = videoSource.GetCurrentVideoFrame();
+                    //传入比对函数中进行比对
+                    CompareImgWithIDImg(bitmap, e);
+                    //if (faceState)
+                    //{
+                    //    recTimes = 8;
+                    //    break;
+                    //}
+                }
+            }
+            //faceState = false;
+            recTimes = 8;
+            faceStop = false;
+        }
+        /// <summary>
+        /// 比对函数，将每一帧抓拍的照片和身份证照片进行比对
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <param name="e"></param>
+        /// <returns></returns>
+        private bool CompareImgWithIDImg(Bitmap bitmap, PaintEventArgs e)
+        {
+            recTimes--;
+            if (bitmap == null)
+            {
+                return false;
+            }
+            Graphics g = e.Graphics;
+            float offsetX = videoSource.Width * 1f / bitmap.Width;
+            float offsetY = videoSource.Height * 1f / bitmap.Height;
+            //检测人脸，得到Rect框
+            ASF_MultiFaceInfo multiFaceInfo = FaceUtil.DetectFace(pVideoEngine, bitmap);
+            //得到最大人脸
+            ASF_SingleFaceInfo maxFace = FaceUtil.GetMaxFace(multiFaceInfo);
+            //得到Rect
+            MRECT rect = maxFace.faceRect;
+            float x = rect.left * offsetX;
+            float width = rect.right * offsetX - x;
+            float y = rect.top * offsetY;
+            float height = rect.bottom * offsetY - y;
+            //根据Rect进行画框
+            g.DrawRectangle(pen, x, y, width, height);
+            //if (trackUnit.message != "" && x > 0 && y > 0)
+            //{
+            //    //将上一帧检测结果显示到页面上
+            //    g.DrawString(trackUnit.message, font, brush, x, y + 5);
+            //}
+            //将上一帧检测结果显示到页面上
+            g.DrawString(trackUnit.message, font, brush, x, y + 5);
+
+            //保证只检测一帧，防止页面卡顿以及出现其他内存被占用情况
+            if (isLock == false)
+            {
+                isLock = true;
+                //异步处理提取特征值和比对，不然页面会比较卡
+                ThreadPool.QueueUserWorkItem(new WaitCallback(delegate
+                {
+                    if (rect.left != 0 && rect.right != 0 && rect.top != 0 && rect.bottom != 0)
                     {
-                        continue;
-                    }
-                    Cv2.Flip(cFrame, cFrame, OpenCvSharp.FlipMode.Y);
-                    #region 人脸追踪
-                    //检测人脸，得到Rect框
-                    MultiFaceModel multiFaceInfo = arcFace.FaceDetection(cFrame.ToBitmap());
-                    if(multiFaceInfo.FaceInfoList.Count>0)
-                    {
-                        Mrect mrect = multiFaceInfo.FaceInfoList[0].faceRect;
-                        Rect cMaxrect = new Rect(mrect.left, mrect.top, mrect.right - mrect.left, mrect.bottom - mrect.top);
-                        //绘制指定区域(人脸框)
-                        Scalar color = new Scalar(0, 0, 255);
-                        Cv2.Rectangle(cFrame, cMaxrect, color, 1);
-                        if(!string.IsNullOrWhiteSpace(IDCardHelper.AvatarPath))//拍照，截取追踪的人脸(如果获取到身份证照片)
+                        try
                         {
-                            this.pic_Capture.Image = null;
-                            this.pic_IdCard.Image = null;
+                            //提取人脸特征
+                            IntPtr feature = FaceUtil.ExtractFeature(pVideoImageEngine, bitmap, maxFace);
+                            float similarity = CompareTwoFeatures(feature, idCardHelper.idInfo.imageFeature);
+                            this.similarity.Text = ("相似度为: " + similarity.ToString("P")); ; //显示在界面上
+                            this.similarity.ForeColor = similarity > threshold ? Color.Green : Color.Red;
+                            //得到比对结果
+                            int result = (CompareTwoFeatures(feature, idCardHelper.idInfo.imageFeature) >= threshold) ? 1 : -1;
+                            if (result > -1)
+                            {
+                                //存放当前人脸识别的相似度
+                                idCardHelper.idInfo.similarity = similarity;
+                                //记录下当前的摄像头的人脸抓拍照
+                                idCardHelper.idInfo.capImage = bitmap;
+                                //标志人脸比对验证通过
+                                //faceState = true;
+                                //验证通过则不再是当前身份证，等待下一次身份证
+                                idCardHelper.idInfo.isRight = false;
+                                //在子线程中输出信息到messageBox
+                                AppendText p = new AppendText(AddTextToMessBox);
+                                lbl_msg.Invoke(p, "人脸验证成功，请通过闸机...\n");
+                                //最终通过闸机
+                                pass = 1;
+                                //以人脸识别的方式通过闸机
+                                idCardHelper.idInfo.isPass = 1;
+                                /*
+                                 *通信部分，将内存中的数据存放到数据库中
+                                 */
+                                //将身份证数据传入到服务器上
+                                //sendMessageToServer();
 
-                            string picCap = PicSavePath + "CAPTURE.JPG";//被抓拍保存的图片名称
-                            Mat cHead = new Mat(cFrame, cMaxrect);
-                            Cv2.ImWrite(picCap, cHead);
-                            SetPictureBoxImage(pic_Capture, cHead.ToBitmap());
-                            cHead.Release();
-
-
-                            Image imgCapture = Image.FromFile(picCap);
-                            Bitmap imgCaptureBmp = new Bitmap(imgCapture);
-                            this.pic_Capture.Image = imgCaptureBmp;
-                            this.imgCaptureBmpTemp = imgCaptureBmp;
-                            imgCapture.Dispose();
-
-                            Image imgIdCard = Image.FromFile(IDCardHelper.AvatarPath);
-                            Bitmap imgIdCardBmp = new Bitmap(imgIdCard);
-                            this.imgIdCardBmpTemp = imgIdCardBmp;
-                            this.pic_IdCard.Image = imgIdCardBmp;
-                            imgIdCard.Dispose();
-
-                            #region 注释
-                            //bool ret = true;
-                            //CompareAvatar(imgCaptureBmp, imgIdCardBmp, ref ret);
-                            //if (ret)//如果匹配成功
-                            //{
-                            //    //第三步：准备相关数据。
-                            //    setFormTextValue(ret);
-                            //    this.Close();
-                            //}
-                            #endregion
-                           
-                            IDCardHelper.AvatarPath = "";//置空
+                                //将比对结果放到显示消息中，用于最新显示
+                                trackUnit.message = string.Format("通过验证，相似度为{0}", similarity);
+                                FileHelper.DeleteFile(m_strPath);   //删除验证过的本地文件
+                                //延时1秒
+                                Thread.Sleep(2000);
+                                //照片恢复默认照片
+                                this.IDPbox.Image = defaultImage;
+                                trackUnit.message = "";//人脸识别框文字置空
+                                setFormResultValue(true);
+                            }
+                            else
+                            {
+                                pass = 0;//标志未通过
+                                //重置显示消息
+                                trackUnit.message = "未通过人脸验证";
+                                AppendText p = new AppendText(AddTextToMessBox);
+                                lbl_msg.Invoke(p, "抱歉，您未通过人脸验证...\n");
+                                FileHelper.DeleteFile(m_strPath);//删除验证过的本地文件
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                            FileHelper.DeleteFile(m_strPath);//删除验证过的本地文件
+                        }
+                        finally
+                        {
+                            isLock = false;
                         }
                     }
-                    multiFaceInfo.Dispose();
-                    #endregion
-                    SetPictureBoxImage(pic_Camera, cFrame.ToBitmap());
-                    cFrame.Release();//释放   
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine(ex.Message);
-                    cFrame.Release();//释放
-                    IDCardHelper.AvatarPath = "";//置空
-                }
+                    isLock = false;
+                }));
             }
+            return false;
         }
 
         /// <summary>
-        /// 人脸比对线程
+        /// 比较两个特征值的相似度,返回相似度
         /// </summary>
-        private void VerifyAvatar()
+        /// <param name="feature1"></param>
+        /// <param name="feature2"></param>
+        /// <returns></returns>
+        private float CompareTwoFeatures(IntPtr feature1, IntPtr feature2)
         {
-            while(bPlayFlag)
-            {
-                bool ret = true;
-                if(imgCaptureBmpTemp!=null&& imgIdCardBmpTemp != null)
-                {
-                    CompareAvatar(imgCaptureBmpTemp, imgIdCardBmpTemp, ref ret);
-                   
-                    if (ret)//如果匹配成功
-                    {
-                        //第三步：准备相关数据。
-                        setFormTextValue(ret);
-                        this.Close();
-                        MemoryUtil.ClearMemory();
-                    }
-                    MemoryUtil.ClearMemory();
-                }
-            }
+            float similarity = 0.0f;
+            //调用人脸匹配方法，进行匹配
+            ASFFunctions.ASFFaceFeatureCompare(pVideoImageEngine, feature1, feature2, ref similarity);
+            return similarity;
         }
-
         /// <summary>
-        /// 填充每一帧画面到图片控件
+        /// 窗体加载事件
         /// </summary>
-        /// <param name="pic"></param>
-        /// <param name="bitmap"></param>
-        private void SetPictureBoxImage(PictureBox pic,Bitmap bitmap)
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void IdentityVerify_Load(object sender, EventArgs e)
         {
-            pic.Image = bitmap;
+            //身份证读卡子线程
+            //为了将身份证的信息读到内存中来
+            idCardHelper = new IDCardHelper();
+            idCardHelper.GetAvatarInfo(pImageEngine, m_strPath);
+            StartVideo();//开启视频
         }
-
         /// <summary>
-        /// 窗口关闭时，关闭摄像头，并终止摄像头播放线程
+        /// 窗体关闭事件
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void IdentityVerify_FormClosed(object sender, FormClosedEventArgs e)
         {
+            //销毁引擎
+            int retCode = ASFFunctions.ASFUninitEngine(pImageEngine);
+            Console.WriteLine("UninitEngine pImageEngine Result:" + retCode);
+
+            //销毁引擎
+            retCode = ASFFunctions.ASFUninitEngine(pVideoEngine);
+            Console.WriteLine("UninitEngine pVideoEngine Result:" + retCode);
+
+            //销毁引擎
+            retCode = ASFFunctions.ASFUninitEngine(pVideoImageEngine);
+            Console.WriteLine("UninitEngine pVideoImageEngine Result:" + retCode);
+
+            if (videoSource.IsRunning)
+            {
+                videoSource.SignalToStop(); //关闭摄像头
+            }
+            idCardHelper.CloseService();
             this.Dispose();
-            ThreadCam.Abort();
-            //上面调用Thread.Abort方法后线程thread不一定马上就被终止了，所以在这里写了个循环来做检查
-            //看线程thread是否已经真正停止。其实也可以在这里使用Thread.Join方法来等待线程thread终止Thread.Join方法做的事情和我们在这里写的循环效果是一样的，都是阻塞主线程直到thread线程终止为止
-
-            m_vCapture.Release();
-            arcFace.Dispose();
-            bPlayFlag = false;
-            idCardHelper.CloseComm();
-        }
-        /// <summary>
-        /// 比较人脸
-        /// </summary>
-        /// <param name="camImg"></param>
-        /// <param name="idCardImg"></param>
-        private void CompareAvatar(Bitmap camImg,Bitmap idCardImg,ref bool retCompare)
-        {
-            imgCaptureBmpTemp = null;
-            imgIdCardBmpTemp = null;
-            //图片比对
-            arcFaceImg = new ArcFaceCore(APPID, FT_SDKKEY, ArcFaceDetectMode.IMAGE,
-             ArcFaceFunction.FACE_DETECT | ArcFaceFunction.FACE_RECOGNITION | ArcFaceFunction.AGE | ArcFaceFunction.FACE_3DANGLE | ArcFaceFunction.GENDER, DetectionOrientPriority.ASF_OP_0_ONLY, 1, 16);
-            //将第一张图片的 Bitmap 转换成 ImageData
-            ImageData camImgData = ImageDataConverter.ConvertToImageData(camImg);
-            ImageData idCardImgData = ImageDataConverter.ConvertToImageData(idCardImg);
-
-            try
-            {
-                // 检测第一张图片中的人脸
-                MultiFaceModel camImgMultiFace = arcFaceImg.FaceDetection(camImgData);
-                // 取第一张图片中返回的第一个人脸信息
-                AsfSingleFaceInfo camImgfaceInfo = camImgMultiFace.FaceInfoList.First();
-                // 提第一张图片中返回的第一个人脸的特征
-                AsfFaceFeature asfFaceFeatureCam = arcFaceImg.FaceFeatureExtract(camImgData, ref camImgfaceInfo);
-
-                MultiFaceModel idCardImgMultiFace = arcFaceImg.FaceDetection(idCardImgData);
-                AsfSingleFaceInfo idCardImgfaceInfo = idCardImgMultiFace.FaceInfoList.First();
-                AsfFaceFeature asfFaceFeatureIdCard = arcFaceImg.FaceFeatureExtract(idCardImgData, ref idCardImgfaceInfo);
-                float ret = arcFaceImg.FaceCompare(asfFaceFeatureCam, asfFaceFeatureIdCard);
-
-                if (ret > 0.6)
-                {
-                    lbl_msg.ForeColor = Color.Green;
-                    lbl_msg.Text = "人脸匹配成功--相似度：" + ret.ToString("P"); ;
-                    FileHelper.DelectDir(PicSavePath);
-                    retCompare= true;
-                }
-                else
-                {
-                    lbl_msg.ForeColor = Color.Red;
-                    lbl_msg.Text = "人脸匹配失败--相似度：" + ret.ToString("P"); ;
-                    retCompare= false;
-                }
-            }
-            catch (Exception ex)
-            {
-                lbl_msg.ForeColor = Color.Red;
-                lbl_msg.Text = "人脸匹配失败Ex：" + ex.Message;
-                retCompare= false;
-            }
-            finally
-            {
-                //释放销毁引擎
-                arcFaceImg.Dispose();
-                // ImageData使用完之后记得要 Dispose 否则会导致内存溢出 
-                camImgData.Dispose();
-                idCardImgData.Dispose();
-                // BItmap也要记得 Dispose
-                camImg.Dispose();
-                idCardImg.Dispose();
-                //GC.Collect();
-            }
+            this.Close();
         }
     }
 }
