@@ -133,17 +133,9 @@ namespace ReceiveCardAIO
 
             #region 视频专用FR引擎
             detectFaceMaxNum = 1;
-            combinedMask = FaceEngineMask.ASF_FACERECOGNITION | FaceEngineMask.ASF_FACE3DANGLE;
+            combinedMask = FaceEngineMask.ASF_FACERECOGNITION | FaceEngineMask.ASF_FACE3DANGLE | FaceEngineMask.ASF_LIVENESS;
             retCode = ASFFunctions.ASFInitEngine(detectMode, detectFaceOrientPriority, detectFaceScaleVal, detectFaceMaxNum, combinedMask, ref pVideoImageEngine);
             Console.WriteLine("InitVideoEngine Result:" + retCode);
-
-
-
-            //RGB视频专用FR引擎
-            detectFaceMaxNum = 1;
-            combinedMask = FaceEngineMask.ASF_FACE_DETECT | FaceEngineMask.ASF_FACERECOGNITION | FaceEngineMask.ASF_LIVENESS;
-            retCode = ASFFunctions.ASFInitEngine(detectMode, detectFaceOrientPriority, detectFaceScaleVal, detectFaceMaxNum, combinedMask, ref pVideoRGBImageEngine);
-
 
 
             if (retCode == 0)
@@ -295,7 +287,7 @@ namespace ReceiveCardAIO
                                 }
                                 int retCode_Liveness = -1;
                                 //RGB活体检测
-                                ASF_LivenessInfo liveInfo = FaceUtil.LivenessInfo_RGB(pVideoRGBImageEngine, imageInfo, multiFaceInfo, out retCode_Liveness);
+                                ASF_LivenessInfo liveInfo = FaceUtil.LivenessInfo_RGB(pVideoImageEngine, imageInfo, multiFaceInfo, out retCode_Liveness);
                                 //判断检测结果
                                 if (retCode_Liveness == 0 && liveInfo.num > 0)
                                 {
@@ -340,8 +332,9 @@ namespace ReceiveCardAIO
                                     pass = 0;//标志未通过
                                     trackUnit.message = "未通过，系统识别为照片";
                                     AppendText p = new AppendText(AddTextToMessBox);
-                                    lbl_msg.Invoke(p, "抱歉，系统识别为照片...\n");
+                                    lbl_msg.Invoke(p, "抱歉，您未通过人脸验证...\n");
                                     FileHelper.DeleteFile(m_strPath);//删除验证过的本地文件
+                                    //MemoryUtil.Free(imageInfo.imgData);
                                 }
                             }
                             else
@@ -415,11 +408,6 @@ namespace ReceiveCardAIO
             retCode = ASFFunctions.ASFUninitEngine(pVideoImageEngine);
             Console.WriteLine("UninitEngine pVideoImageEngine Result:" + retCode);
 
-            //销毁引擎
-            retCode = ASFFunctions.ASFUninitEngine(pVideoRGBImageEngine);
-            Console.WriteLine("UninitEngine pVideoRGBImageEngine Result:" + retCode);
-
-
             if (videoSource.IsRunning)
             {
                 videoSource.SignalToStop(); //关闭摄像头
@@ -427,6 +415,7 @@ namespace ReceiveCardAIO
             idCardHelper.CloseService();
             this.Dispose();
             this.Close();
+            MemoryUtil.ClearMemory();
         }
     }
 }
