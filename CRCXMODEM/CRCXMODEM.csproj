@@ -49,5 +49,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StrCommon.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="README.md" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

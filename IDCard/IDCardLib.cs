@@ -11,7 +11,7 @@ namespace IDCard
         /// <summary>
         /// SDK动态链接库路径
         /// </summary>
-        public const string Dll_PATH = @"lib/termb.dll";
+        public const string Dll_PATH = @"termb.dll";
         /// <summary>
         /// 连接身份证阅读器
         /// </summary>

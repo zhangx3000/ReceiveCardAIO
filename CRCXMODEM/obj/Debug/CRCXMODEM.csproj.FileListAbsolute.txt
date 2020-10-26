@@ -9,3 +9,4 @@ C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\bin
 C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.csproj.CoreCompileInputs.cache
 C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.dll
 C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.pdb
+C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.csprojAssemblyReference.cache

@@ -9,3 +9,4 @@ C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\
 C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.csproj.CoreCompileInputs.cache
 C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.dll
 C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.pdb
+C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.csprojAssemblyReference.cache

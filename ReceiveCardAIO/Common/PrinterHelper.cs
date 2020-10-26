@@ -13,7 +13,7 @@ namespace ReceiveCardAIO
         /// <summary>
         /// SDK动态链接库路径
         /// </summary>
-        public const string Dll_PATH = @"lib/TxPrnMod.dll";
+        public const string Dll_PATH = @"TxPrnMod.dll";
 
         #region TxPrnMod.dll 打印机dll基础接口封装
         /// <summary>
