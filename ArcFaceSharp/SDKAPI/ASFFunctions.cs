@@ -11,7 +11,7 @@ namespace ArcFaceSharp.SDKAPI
         /// <summary>
         /// SDK动态链接库路径
         /// </summary>
-        public const string Dll_PATH = "libarcsoft_face_engine.dll";
+        public const string Dll_PATH = @"lib/libarcsoft_face_engine.dll";
 
         /// <summary>
         /// 激活人脸识别SDK引擎函数

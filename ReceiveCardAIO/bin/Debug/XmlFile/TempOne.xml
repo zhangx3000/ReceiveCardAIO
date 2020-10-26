@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<root>
+	<template>
+　　　加油单
+单号：[0]
+编号：[1]
+车主：[2]
+油品：[3]
+	</template>
+	<paracount>4</paracount> 
+</root>

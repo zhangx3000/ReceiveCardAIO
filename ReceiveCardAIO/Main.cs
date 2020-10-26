@@ -1,6 +1,4 @@
-﻿using CRCXMODEM;
-using ReceiveCardAIO.Common;
-using System;
+﻿using System;
 using System.Windows.Forms;
 
 namespace ReceiveCardAIO
@@ -51,7 +49,22 @@ namespace ReceiveCardAIO
         /// <param name="e"></param>
         private void btn_Receive_Click(object sender, EventArgs e)
         {
-            Console.WriteLine("回收卡成功");
+            //Console.WriteLine("回收卡成功");
+            string printTxt = PrinterHelper.GetTmpAndPara(Application.StartupPath + "\\XmlFile\\TempOne.xml", "13700700960&豫N 81996&张宇&#95");
+            if (!string.IsNullOrEmpty(printTxt))
+            {
+                bool ret = PrinterHelper.PrintByTxt(printTxt);
+                if(ret)
+                {
+                    MessageBox.Show("出票成功");
+                }else
+                {
+                    MessageBox.Show("出票失败");
+                }
+            }else
+            {
+                MessageBox.Show("出票失败");
+            }
         }
     }
 }

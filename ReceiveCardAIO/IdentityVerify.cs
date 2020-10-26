@@ -29,7 +29,7 @@ namespace ReceiveCardAIO
         //视频引擎 FR Handle 处理   FR和图片引擎分开，减少强占引擎的问题
         private IntPtr pVideoImageEngine = IntPtr.Zero;
 
-        private IntPtr pVideoRGBImageEngine = IntPtr.Zero;//RGB活体检测
+        //private IntPtr pVideoRGBImageEngine = IntPtr.Zero;//RGB活体检测
 
         // 视频输入设备信息
         private FilterInfoCollection filterInfoCollection;
