@@ -371,18 +371,17 @@ namespace ReceiveCardAIO
                         PrinterHelper.TxDoFunction(10, 240, 0);//走纸30毫米
                         PrinterHelper.TxDoFunction(12, 2, 40);//走纸30毫米
 
-                        ret = true;
                         //Thread.Sleep(1000);
-                        //bool isSuccess = PrinterHelper.CheckIsPrintSuccess();
-                        //if (isSuccess)
-                        //{
-                        //    ret = true;
-                        //}
-                        //else
-                        //{
-                        //    //MessageBox.Show("打印失败，有可能是打印机内纸不够、打印机断电或其他异常，请确保打印机接上电源并且其内有足够的纸，然后执行一次关闭打印机后再打开打印机。");
-                        //    return false;
-                        //}
+                        bool isSuccess = PrinterHelper.CheckIsPrintSuccess();
+                        if (isSuccess)
+                        {
+                            ret = true;
+                        }
+                        else
+                        {
+                            //MessageBox.Show("打印失败，有可能是打印机内纸不够、打印机断电或其他异常，请确保打印机接上电源并且其内有足够的纸，然后执行一次关闭打印机后再打开打印机。");
+                            ret = false;
+                        }
                     }
                     else if (status == 56)
                     {

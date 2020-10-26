@@ -58,7 +58,8 @@ namespace ArcFaceSharp.Util
         /// <returns>转化后的对象</returns>
         public static T PtrToStructure<T>(IntPtr ptr)
         {
-            return Marshal.PtrToStructure<T>(ptr);
+            //return Marshal.PtrToStructure<T>(ptr);//.net 4.0 不支持
+            return (T)Marshal.PtrToStructure(ptr, typeof(T));
         }
 
         /// <summary>
@@ -79,9 +80,9 @@ namespace ArcFaceSharp.Util
         /// <returns>类型的大小</returns>
         public static int SizeOf<T>()
         {
-            return Marshal.SizeOf<T>();
+            //return Marshal.SizeOf<T>();//.net 4.0 不支持
+            return Marshal.SizeOf(typeof(T));
         }
-
 
         [DllImport("kernel32.dll", EntryPoint = "SetProcessWorkingSetSize")]
         public static extern int SetProcessWorkingSetSize(IntPtr process, int minSize, int maxSize);
