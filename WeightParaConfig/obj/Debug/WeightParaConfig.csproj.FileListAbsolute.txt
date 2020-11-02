@@ -1,0 +1,10 @@
+C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\WeightParaConfig\bin\Debug\WeightParaConfig.exe.config
+C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\WeightParaConfig\bin\Debug\WeightParaConfig.exe
+C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\WeightParaConfig\bin\Debug\WeightParaConfig.pdb
+C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\WeightParaConfig\bin\Debug\CRCXMODEM.dll
+C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\WeightParaConfig\bin\Debug\CRCXMODEM.pdb
+C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\WeightParaConfig\obj\Debug\WeightParaConfig.csprojAssemblyReference.cache
+C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\WeightParaConfig\obj\Debug\WeightParaConfig.csproj.CoreCompileInputs.cache
+C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\WeightParaConfig\obj\Debug\WeightParaConfig.csproj.CopyComplete
+C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\WeightParaConfig\obj\Debug\WeightParaConfig.exe
+C:\Users\yumas\Desktop\物联网\收发卡一体机\ReceiveCardAIO\WeightParaConfig\obj\Debug\WeightParaConfig.pdb
