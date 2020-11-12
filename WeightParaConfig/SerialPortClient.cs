@@ -1,276 +1,384 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Ports;
+using System.Linq;
+using System.Text;
+using System.Threading;
 
-namespace WeightParaConfig
+namespace ParaConfig
 {
     public class SerialPortClient
     {
-        #region 静态方法
-        /// <summary>
-        /// 设置串口号
-        /// </summary>
-        /// <param name="obj">需要绑定的项的集合（如：ComboBox中项的集合ComboBox.Items）</param>
-        public static void SetPortNameValues(IList obj)
-        {
-            obj.Clear();
-            try
-            {
-                foreach (string str in SerialPort.GetPortNames())
-                {
-                    obj.Add(str);
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine("未能查询到串口名称——" + e.ToString());
-            }
 
-        }
+        #region Private Fields
 
-        /// <summary>
-        /// 设置波特率
-        /// </summary>
-        /// <param name="obj">需要绑定的项的集合（如：ComboBox中项的集合ComboBox.Items）</param>
-        public static void SetBauRateValues(IList obj)
-        {
-            obj.Clear();
-            foreach (BaudRates rate in Enum.GetValues(typeof(BaudRates)))
-            {
-                obj.Add(((int)rate).ToString());
-            }
-        }
+        private SerialPort _serialPort;
 
-        /// <summary>
-        /// 设置数据位
-        /// </summary>
-        /// <param name="obj">需要绑定的项的集合（如：ComboBox中项的集合ComboBox.Items）</param>
-        public static void SetDataBitsValues(IList obj)
-        {
-            obj.Clear();
-            foreach (DataBits databit in Enum.GetValues(typeof(DataBits)))
-            {
-                obj.Add(((int)databit).ToString());
-            }
-        }
+        private string _portName = "";
+        private int _baudRate = 115200;
+        private StopBits _stopBits = StopBits.One;
+        private Parity _parity = Parity.None;
+        private DataBits _dataBits = DataBits.Eight;
 
-        /// <summary>
-        /// 设置校验位列表
-        /// </summary>
-        /// <param name="obj">需要绑定的项的集合（如：ComboBox中项的集合ComboBox.Items）</param>
-        public static void SetParityValues(IList obj)
-        {
-            obj.Clear();
-            foreach (string str in Enum.GetNames(typeof(Parity)))
-            {
-                obj.Add(str);
-            }
-        }
+        // 读/写错误状态变量
+        private bool gotReadWriteError = true;
 
-        /// <summary>
-        /// 设置停止位
-        /// </summary>
-        /// <param name="obj">需要绑定的项的集合（如：ComboBox中项的集合ComboBox.Items）</param>
-        public static void SetStopBitValues(IList obj)
-        {
-            obj.Clear();
-            foreach (string str in Enum.GetNames(typeof(StopBits)))
-            {
-                obj.Add(str);
-            }
-        }
+        // 串行端口读取器任务
+        private Thread reader;
+        private CancellationTokenSource readerCts;
+        // 串行端口连接监视程序
+        private Thread connectionWatcher;
+        private CancellationTokenSource connectionWatcherCts;
+
+        private object accessLock = new object();
+        private bool disconnectRequested = false;
+
         #endregion
 
-        #region 变量属性
-        public event Action<List<byte>> DataReceived;
-        public event SerialErrorReceivedEventHandler ErrorReceived;
-        private SerialPort comPort = new SerialPort();
+        #region Public Events
 
         /// <summary>
-        /// 串口号
+        /// 连接状态改变事件
         /// </summary>
-        public string PortName { get; set; } = "COM1";
+        public delegate void ConnectionStatusChangedEventHandler(object sender, ConnectionStatusChangedEventArgs args);
 
         /// <summary>
-        /// 波特率
+        /// 连接状态更改时发生
         /// </summary>
-        public BaudRates BaudRate { get; set; } = BaudRates.BR_9600;
+        public event ConnectionStatusChangedEventHandler ConnectionStatusChanged;
 
         /// <summary>
-        /// 奇偶校验位
+        /// 消息接收事件
         /// </summary>
-        public Parity Parity { get; set; } = Parity.None;
+        //public delegate void MessageReceivedEventHandler(object sender, MessageReceivedEventArgs args);
 
         /// <summary>
-        /// 数据位
+        /// 收到消息时发生
         /// </summary>
-        public DataBits DataBits { get; set; } = DataBits.Eight;
+        //public event MessageReceivedEventHandler MessageReceived;
 
-        /// <summary>
-        /// 停止位
-        /// </summary>
-        public StopBits StopBits { get; set; } = StopBits.One;
+        public event Action<List<byte>> MessageReceived;
+
         #endregion
 
-        #region 构造函数
-        /// <summary>
-        /// 无参构造函数
-        /// </summary>
+        #region Public Members
         public SerialPortClient()
         {
-            BoundEvents();
-        }
-
-        void BoundEvents()
-        {
-            comPort.DataReceived += new SerialDataReceivedEventHandler(comPort_DataReceived);
-            comPort.ErrorReceived += new SerialErrorReceivedEventHandler(comPort_ErrorReceived);
+            connectionWatcherCts = new CancellationTokenSource();
+            readerCts = new CancellationTokenSource();
         }
 
         /// <summary>
-        /// 参数构造函数（使用枚举参数构造）
+        /// 连接到串口
         /// </summary>
-        /// <param name="baud">波特率</param>
-        /// <param name="par">奇偶校验位</param>
-        /// <param name="sBits">停止位</param>
-        /// <param name="dBits">数据位</param>
-        /// <param name="name">串口号</param>
-        public SerialPortClient(string name, BaudRates baud, Parity par, DataBits dBits, StopBits sBits)
+        public bool Connect()
         {
-            this.PortName = name;
-            this.BaudRate = baud;
-            this.Parity = par;
-            this.DataBits = dBits;
-            this.StopBits = sBits;
-            BoundEvents();
+            if (disconnectRequested)
+                return false;
+            lock (accessLock)
+            {
+                Disconnect();
+                Open();
+                connectionWatcherCts = new CancellationTokenSource();
+                connectionWatcher = new Thread(ConnectionWatcherTask);
+                connectionWatcher.Start(connectionWatcherCts.Token);
+            }
+            return IsConnected;
         }
 
         /// <summary>
-        /// 参数构造函数（使用字符串参数构造）
+        /// 断开串口
         /// </summary>
-        /// <param name="baud">波特率</param>
-        /// <param name="par">奇偶校验位</param>
-        /// <param name="sBits">停止位</param>
-        /// <param name="dBits">数据位</param>
-        /// <param name="name">串口号</param>
-        public SerialPortClient(string name, string baud, string par, string dBits, string sBits)
+        public void Disconnect()
         {
-            this.PortName = name;
-            this.BaudRate = (BaudRates)Enum.Parse(typeof(BaudRates), baud);
-            this.Parity = (Parity)Enum.Parse(typeof(Parity), par);
-            this.DataBits = (DataBits)Enum.Parse(typeof(DataBits), dBits);
-            this.StopBits = (StopBits)Enum.Parse(typeof(StopBits), sBits);
-            BoundEvents();
+            if (disconnectRequested)
+                return;
+            disconnectRequested = true;
+            Close();
+            lock (accessLock)
+            {
+                if (connectionWatcher != null)
+                {
+                    if (!connectionWatcher.Join(5000))
+                        connectionWatcherCts.Cancel();
+                    connectionWatcher = null;
+                }
+                disconnectRequested = false;
+            }
         }
+
+        /// <summary>
+        /// 获取一个值，该值指示串行端口是否已连接。
+        /// </summary>
+        /// <value><c>true</c> if connected; otherwise, <c>false</c>.</value>
+        public bool IsConnected
+        {
+            get { return _serialPort != null && !gotReadWriteError && !disconnectRequested; }
+        }
+
+        /// <summary>
+        /// 设置串行端口选项。
+        /// </summary>
+        /// <param name="portName">Portname.</param>
+        /// <param name="baudRate">Baudrate.</param>
+        /// <param name="stopBits">Stopbits.</param>
+        /// <param name="parity">Parity.</param>
+        /// <param name="dataBits">Databits.</param>
+        public void SetPort(string portName, string baudRate, string parity, string dataBits, string stopBits)
+        {
+            // 更改参数请求
+            // 立即考虑新的连接参数
+            // (不要使用ConnectionWatcher，否则会发生奇怪的事情!)
+            _portName = portName;
+            _baudRate = int.Parse(baudRate);
+            _parity = (Parity)Enum.Parse(typeof(Parity), parity);
+            _dataBits = (DataBits)Enum.Parse(typeof(DataBits), dataBits);
+            _stopBits = (StopBits)Enum.Parse(typeof(StopBits), stopBits);
+
+
+            if (IsConnected)
+            {
+                Connect();      // 立即考虑新的连接参数
+            }
+            LogDebug(string.Format("Port parameters changed (port name {0} / baudrate {1} / stopbits {2} / parity {3} / databits {4})", portName, baudRate, stopBits, parity, dataBits));
+        }
+
+        /// <summary>
+        /// 发送消息。
+        /// </summary>
+        /// <returns><c>true</c>, 如果消息已发送, <c>false</c> 否则.</returns>
+        /// <param name="message">Message.</param>
+        public bool SendMessage(byte[] message)
+        {
+            bool success = false;
+            if (IsConnected)
+            {
+                try
+                {
+                    _serialPort.Write(message, 0, message.Length);
+                    success = true;
+                    LogDebug(BitConverter.ToString(message));
+                }
+                catch (Exception e)
+                {
+                    LogError(e);
+                }
+            }
+            return success;
+        }
+
         #endregion
 
-        #region 事件处理函数
+        #region 私有成员
+
+        #region 串行端口处理
+
+        private bool Open()
+        {
+            bool success = false;
+            lock (accessLock)
+            {
+                Close();
+                try
+                {
+                    bool tryOpen = true;
+                    var isWindows = Environment.OSVersion.Platform.ToString().StartsWith("Win");
+                    if (!isWindows)
+                    {
+                        tryOpen = (tryOpen && System.IO.File.Exists(_portName));
+                    }
+                    if (tryOpen)
+                    {
+                        _serialPort = new SerialPort();
+                        _serialPort.ErrorReceived += HandleErrorReceived;
+                        _serialPort.PortName = _portName;
+                        _serialPort.BaudRate = _baudRate;
+                        _serialPort.StopBits = _stopBits;
+                        _serialPort.Parity = _parity;
+                        _serialPort.DataBits = (int)_dataBits;
+
+                        // 我们没有使用接收到serialPort.DataReceived接收数据的事件，因为这在Linux/Mono下不起作用.
+                        // 我们改用readerTask（见下文）。
+                        _serialPort.Open();
+                        success = true;
+                    }
+                }
+                catch (Exception e)
+                {
+                    LogError(e);
+                    Close();
+                }
+                if (_serialPort != null && _serialPort.IsOpen)
+                {
+                    gotReadWriteError = false;
+                    // 启动读任务
+                    readerCts = new CancellationTokenSource();
+                    reader = new Thread(ReaderTask);
+                    reader.Start(readerCts.Token);
+                    OnConnectionStatusChanged(new ConnectionStatusChangedEventArgs(true));
+                }
+            }
+            return success;
+        }
+
+        private void Close()
+        {
+            lock (accessLock)
+            {
+                // 停止读任务
+                if (reader != null)
+                {
+                    if (!reader.Join(5000))
+                        readerCts.Cancel();
+                    reader = null;
+                }
+                if (_serialPort != null)
+                {
+                    _serialPort.ErrorReceived -= HandleErrorReceived;
+                    if (_serialPort.IsOpen)
+                    {
+                        _serialPort.Close();
+                        OnConnectionStatusChanged(new ConnectionStatusChangedEventArgs(false));
+                    }
+                    _serialPort.Dispose();
+                    _serialPort = null;
+                }
+                gotReadWriteError = true;
+            }
+        }
+
+        private void HandleErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+        {
+            LogError(e.EventType);
+        }
+
+        #endregion
+
+        #region 后台任务
         /// <summary>
         /// 数据仓库
         /// </summary>
         List<byte> datapool = new List<byte>();//存放接收的所有字节
-        /// <summary>
-        /// 数据接收处理
-        /// </summary>
-        void comPort_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        private void ReaderTask(object data)
         {
-            if (comPort.IsOpen)     //判断是否打开串口
+            var ct = (CancellationToken)data;
+            while (IsConnected && !ct.IsCancellationRequested)
             {
-                //Thread.Sleep(50);
-                Byte[] receivedData = new Byte[comPort.BytesToRead];        //创建接收字节数组
-                comPort.Read(receivedData, 0, receivedData.Length);         //读取数据
-
-                //触发整条记录的处理
-                if (DataReceived != null)
+                int msglen = 0;
+                //
+                try
                 {
-                    datapool.AddRange(receivedData);
-                    DataReceived(datapool);
+                    msglen = _serialPort.BytesToRead;
+                    if (msglen > 0)
+                    {
+                        byte[] message = new byte[msglen];
+                        //
+                        int readbytes = 0;
+                        while (_serialPort.Read(message, readbytes, msglen - readbytes) <= 0)
+                            ; // noop
+                        if (MessageReceived != null)
+                        {
+                            //OnMessageReceived(new MessageReceivedEventArgs(message));
+                            datapool.AddRange(message);
+                            OnMessageReceived(datapool);
+                        }
+                    }
+                    else
+                    {
+                        Thread.Sleep(100);
+                    }
+                }
+                catch (Exception e)
+                {
+                    LogError(e);
+                    gotReadWriteError = true;
+                    Thread.Sleep(1000);
                 }
             }
-            else
+        }
+
+        private void ConnectionWatcherTask(object data)
+        {
+            var ct = (CancellationToken)data;
+            // 此任务负责自动重新连接接口
+            // 当连接断开或发生I/O错误时
+            while (!disconnectRequested && !ct.IsCancellationRequested)
             {
-                Console.WriteLine("请打开串口", "Error");
+                if (gotReadWriteError)
+                {
+                    try
+                    {
+                        Close();
+                        // 请等待1秒钟，然后重新连接
+                        Thread.Sleep(1000);
+                        if (!disconnectRequested)
+                        {
+                            try
+                            {
+                                Open();
+                            }
+                            catch (Exception e)
+                            {
+                                LogError(e);
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        LogError(e);
+                    }
+                }
+                if (!disconnectRequested)
+                    Thread.Sleep(1000);
             }
         }
-        /// <summary>
-        /// 错误处理函数
-        /// </summary>
-        void comPort_ErrorReceived(object sender, SerialErrorReceivedEventArgs e)
+
+        private void LogDebug(string message)
         {
-            if (ErrorReceived != null)
-            {
-                ErrorReceived(sender, e);
-            }
+            Debug.WriteLine(message);
+        }
+
+        private void LogError(Exception ex)
+        {
+            Debug.WriteLine(ex);
+        }
+
+        private void LogError(SerialError error)
+        {
+            Debug.WriteLine("SerialPort ErrorReceived: {0}", error);
+        }
+
+        #endregion
+
+        #region 事件引发
+
+        /// <summary>
+        /// 引发已连接状态更改事件。
+        /// </summary>
+        /// <param name="args">参数.</param>
+        protected virtual void OnConnectionStatusChanged(ConnectionStatusChangedEventArgs args)
+        {
+            LogDebug(args.Connected.ToString());
+            if (ConnectionStatusChanged != null)
+                ConnectionStatusChanged(this, args);
+        }
+
+        /// <summary>
+        /// 引发消息接收事件。
+        /// </summary>
+        /// <param name="args">参数.</param>
+        protected virtual void OnMessageReceived(List<byte> data)
+        {
+            //LogDebug(BitConverter.ToString(args.Data));
+            if (MessageReceived != null)
+                //MessageReceived(this, args);
+                MessageReceived(data);
         }
         #endregion
 
-        #region 串口关闭/打开
-        /// <summary>
-        /// 端口是否已经打开
-        /// </summary>
-        public bool IsOpen
-        {
-            get
-            {
-                return comPort.IsOpen;
-            }
-        }
-
-        /// <summary>
-        /// 打开端口
-        /// </summary>
-        /// <returns></returns>
-        public void Open()
-        {
-            if (comPort.IsOpen) comPort.Close();
-            comPort.PortName = PortName;
-            comPort.BaudRate = (int)BaudRate;
-            comPort.Parity = Parity;
-            comPort.DataBits = (int)DataBits;
-            comPort.StopBits = StopBits;
-            comPort.Open();
-        }
-
-        /// <summary>
-        /// 关闭端口
-        /// </summary>
-        public void Close()
-        {
-            if (comPort.IsOpen) comPort.Close();
-        }
-
-        /// <summary>
-        /// 丢弃来自串行驱动程序的接收和发送缓冲区的数据
-        /// </summary>
-        public void DiscardBuffer()
-        {
-            comPort.DiscardInBuffer();
-            comPort.DiscardOutBuffer();
-        }
         #endregion
 
-        #region 写入数据
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="buffer"></param>
-        public void Write(byte[] buffer, int offset, int count)
-        {
-            if (!(comPort.IsOpen)) comPort.Open();
-            comPort.Write(buffer, offset, count);
-        }
-
-        /// <summary>
-        /// 写入数据
-        /// </summary>
-        /// <param name="buffer">写入端口的字节数组</param>
-        public void Write(byte[] buffer)
-        {
-            if (!(comPort.IsOpen)) comPort.Open();
-            comPort.Write(buffer, 0, buffer.Length);
-        }
-        #endregion
     }
     #region 波特率、数据位的枚举
     /// <summary>

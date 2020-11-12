@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace WeightParaConfig
+namespace ParaConfig
 {
     /// <summary>
     /// 配置参数信息

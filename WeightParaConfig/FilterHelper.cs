@@ -1,6 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-namespace WeightParaConfig
+namespace ParaConfig
 {
     public class FilterHelper
     {
@@ -17,11 +21,7 @@ namespace WeightParaConfig
         private static bool isFirstLF = true;
 
         private static int okCount = 0;//稳定了多少次
-        /// <summary>
-        /// 对结果进行过滤
-        /// </summary>
-        /// <param name="ADNum"></param>
-        /// <returns></returns>
+
         public static bool LimitFilterAD(double ADNum)
         {
             if (isFirstLF)
@@ -57,5 +57,42 @@ namespace WeightParaConfig
                 //return true;
             }
         }
+
+
+
+
+
+
+        /// <summary>
+        ///滑动平均滤波算法（递推平均滤波法）
+        /// </summary>
+        /// <param name="ADNum"为获得的AD数></param>
+        /// GN为数组value_buf[]的元素个数,该函数主要被调用，利用参数的数组传值
+        /// <returns></returns>   
+        //private const int GN = 12;
+        //private static int filterPtr = 0;
+        //private static bool isFirstGF = true;
+        //public static double gSum = 0;
+        //static double[] gbuf = new double[GN];
+
+        //public static double GlideFilterAD(double ADNum)
+        //{
+        //    if (isFirstGF)
+        //    {
+        //        isFirstGF = false;
+        //        for (int i = 0; i < GN; i++)
+        //            gbuf[i] = ADNum;
+        //        gSum = ADNum * GN;
+        //        return ADNum;
+        //    }
+        //    else
+        //    {
+        //        gSum += ADNum - gbuf[filterPtr];
+        //        gbuf[filterPtr++] = ADNum;
+        //        if (filterPtr == GN)
+        //            filterPtr = 0;    //先进先出，再求平均值
+        //        return (gSum / GN);
+        //    }
+        //}
     }
 }
