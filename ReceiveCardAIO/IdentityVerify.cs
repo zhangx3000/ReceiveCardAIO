@@ -169,10 +169,13 @@ namespace ReceiveCardAIO
             else
             {
                 videoSource.Show();
-                deviceVideo = new VideoCaptureDevice(filterInfoCollection[0].MonikerString);
-                deviceVideo.VideoResolution = deviceVideo.VideoCapabilities[0];
-                videoSource.VideoSource = deviceVideo;
-                videoSource.Start();
+                if (filterInfoCollection.Count > 0)
+                {
+                    deviceVideo = new VideoCaptureDevice(filterInfoCollection[0].MonikerString);
+                    deviceVideo.VideoResolution = deviceVideo.VideoCapabilities[0];
+                    videoSource.VideoSource = deviceVideo;
+                    videoSource.Start();
+                }
             }
         }
 

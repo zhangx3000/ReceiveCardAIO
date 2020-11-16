@@ -16,3 +16,9 @@ C:\Users\yumas\Desktop\物联网\收发卡一体机\zzjManager\ArcFaceSharp\obj\
 C:\Users\yumas\Desktop\物联网\收发卡一体机\zzjManager\ArcFaceSharp\obj\Debug\ArcFaceSharp.pdb
 C:\Users\yumas\Desktop\物联网\收发卡一体机\zzjManager\ArcFaceSharp\bin\Debug\ArcFaceSharp.dll
 C:\Users\yumas\Desktop\物联网\收发卡一体机\zzjManager\ArcFaceSharp\bin\Debug\ArcFaceSharp.pdb
+C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\bin\Debug\ArcFaceSharp.dll
+C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\bin\Debug\ArcFaceSharp.pdb
+C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.csprojAssemblyReference.cache
+C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.dll
+C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.pdb
