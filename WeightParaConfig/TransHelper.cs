@@ -11,10 +11,8 @@ namespace ParaConfig
     /// </summary>
     public class TransHelper
     {
-
         //第二步：声明一个委托类型的事件
         public event setResultValue setWeightResultValue;
-
         public TransHelper()
         {
             ParaInfo para = new ParaInfo

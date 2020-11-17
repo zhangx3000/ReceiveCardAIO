@@ -127,7 +127,6 @@ namespace ParaConfig
             return rg.Match(sourse).Value;
         }
 
-
         public static Dictionary<int, string> GetDictByHexStr(string shex)
         {
             Dictionary<int, string> dicRet = new Dictionary<int, string>();

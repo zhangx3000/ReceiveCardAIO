@@ -14,7 +14,6 @@ namespace ParaConfig
         #region Private Fields
 
         private SerialPort _serialPort;
-
         private string _portName = "";
         private int _baudRate = 115200;
         private StopBits _stopBits = StopBits.One;
