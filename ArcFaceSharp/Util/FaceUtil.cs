@@ -20,7 +20,6 @@ namespace ArcFaceSharp.Util
             IntPtr pMultiFaceInfo = MemoryUtil.Malloc(MemoryUtil.SizeOf<ASF_MultiFaceInfo>());
             int retCode = ASFFunctions.ASFDetectFaces(pEngine, imageInfo.width, imageInfo.height, imageInfo.format, imageInfo.imgData, pMultiFaceInfo);
             multiFaceInfo = MemoryUtil.PtrToStructure<ASF_MultiFaceInfo>(pMultiFaceInfo);
-
             return multiFaceInfo;
         }
 
@@ -43,7 +42,6 @@ namespace ArcFaceSharp.Util
                     multiFaceInfo = DetectFace(pEngine, imageInfo);
                     MemoryUtil.Free(imageInfo.imgData);
                     return multiFaceInfo;
-
                 }
                 else
                 {
@@ -97,10 +95,8 @@ namespace ArcFaceSharp.Util
             //释放指针
             MemoryUtil.Free(pSingleFaceInfo);
             MemoryUtil.Free(pFaceFeature);
-
             return pLocalFeature;
         }
-
         /// <summary>
         /// 提取人脸特征
         /// </summary>
@@ -117,8 +113,6 @@ namespace ArcFaceSharp.Util
             MemoryUtil.Free(imageInfo.imgData);
             return pFaceModel;
         }
-
-
         /// <summary>
         /// 提取单人脸特征
         /// </summary>
@@ -171,12 +165,8 @@ namespace ArcFaceSharp.Util
             MemoryUtil.Free(pSingleFaceInfo);
             MemoryUtil.Free(pFaceFeature);
             MemoryUtil.Free(imageInfo.imgData);
-
             return pLocalFeature;
         }
-
-
-
         /// <summary>
         /// 年龄检测
         /// </summary>
@@ -215,8 +205,6 @@ namespace ArcFaceSharp.Util
                 return new ASF_AgeInfo();
             }
         }
-
-
         /// <summary>
         /// 单人脸年龄检测
         /// </summary>
@@ -237,7 +225,6 @@ namespace ArcFaceSharp.Util
             MemoryUtil.Free(imageInfo.imgData);
             return ageInfo;
         }
-
         /// <summary>
         /// 性别检测
         /// </summary>
@@ -269,7 +256,6 @@ namespace ArcFaceSharp.Util
                 //释放内存
                 MemoryUtil.Free(pMultiFaceInfo);
                 MemoryUtil.Free(pGenderInfo);
-
                 return genderInfo;
             }
             else
@@ -317,8 +303,6 @@ namespace ArcFaceSharp.Util
                 return new ASF_Face3DAngle();
             }
         }
-
-
         /// <summary>
         /// 性别检测
         /// </summary>
@@ -351,9 +335,6 @@ namespace ArcFaceSharp.Util
 
             return genderInfo;
         }
-
-
-
         /// <summary>
         /// 单人脸性别检测
         /// </summary>
@@ -447,7 +428,6 @@ namespace ArcFaceSharp.Util
         /// <param name="multiFaceInfo">活体检测结果</param>
         /// <param name="retCode"></param>
         /// <returns>保存活体检测结果结构体</returns>
-
         public static ASF_LivenessInfo LivenessInfo_RGB(IntPtr pEngine,ImageInfo imageInfo,ASF_MultiFaceInfo multiFaceInfo,out int retCode)
         {
             IntPtr pMultiFaceInfo = MemoryUtil.Malloc(MemoryUtil.SizeOf<ASF_MultiFaceInfo>());
@@ -543,6 +523,5 @@ namespace ArcFaceSharp.Util
                 return new ASF_LivenessInfo();
             }
         }
-
     }
 }

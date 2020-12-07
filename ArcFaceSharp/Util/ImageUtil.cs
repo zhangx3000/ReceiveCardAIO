@@ -98,7 +98,6 @@ namespace ArcFaceSharp.Util
             {
                 g.Dispose();
             }
-
             return null;
         }
 
@@ -166,7 +165,6 @@ namespace ArcFaceSharp.Util
             {
                 g.Dispose();
             }
-
             return null;
         }
 
@@ -223,7 +221,6 @@ namespace ArcFaceSharp.Util
                     g.Dispose();
                 }
             }
-
             return null;
         }
 
@@ -299,7 +296,5 @@ namespace ArcFaceSharp.Util
             }
             return null;
         }
-
-
     }
 }

@@ -17,7 +17,6 @@ namespace CRCXMODEM
         public static string 将卡移动到发卡栈 { get { return StrCommon.GetSerialCommand("C24"); } }
     }
 
-
     /// <summary>
     /// 命令列表，eg.C03->43 30 33
     /// 获取枚举描述文本

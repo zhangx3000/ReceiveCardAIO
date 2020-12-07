@@ -9,6 +9,9 @@ using System.Threading;
 
 namespace IDCard
 {
+    /// <summary>
+    /// ID卡身份证帮助类
+    /// </summary>
     public class IDCardHelper
     {
         public static bool IsConnected = false;
@@ -44,7 +47,9 @@ namespace IDCard
                 Thread.Sleep(200);
             }
         }
-
+        /// <summary>
+        /// 关闭服务
+        /// </summary>
         public void CloseService()
         {
             serviceTread.Abort();

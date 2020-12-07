@@ -143,7 +143,6 @@ namespace CRCXMODEM
                         ret = MidStrEx_New(source, item, end);
                     }
                 }
-
                 return !string.IsNullOrEmpty(ret) ? ret : source;
             }
             else

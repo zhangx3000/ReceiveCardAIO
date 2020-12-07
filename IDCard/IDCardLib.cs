@@ -4,7 +4,7 @@ using System.Text;
 namespace IDCard
 {
     /// <summary>
-    /// 身份证识别
+    /// 身份证识别-接口封装
     /// </summary>
     public static class IDCardLib
     {
