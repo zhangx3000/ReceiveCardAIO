@@ -22,3 +22,9 @@ E:\桌面备份\研究项目\物联网\收发卡一体机\ReceiveCardAIO\CRCXMOD
 E:\桌面备份\研究项目\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.csproj.CoreCompileInputs.cache
 E:\桌面备份\研究项目\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.dll
 E:\桌面备份\研究项目\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.pdb
+C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\bin\Debug\CRCXMODEM.dll
+C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\bin\Debug\CRCXMODEM.pdb
+C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.csprojAssemblyReference.cache
+C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.csproj.CoreCompileInputs.cache
+C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.dll
+C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\CRCXMODEM\obj\Debug\CRCXMODEM.pdb

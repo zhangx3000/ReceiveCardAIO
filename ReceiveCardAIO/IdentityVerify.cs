@@ -7,6 +7,7 @@ using ReceiveCardAIO.Common;
 using System;
 using System.Configuration;
 using System.Drawing;
+using System.IO;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -189,7 +190,7 @@ namespace ReceiveCardAIO
             //从摄像头提取图像与身份证证件照进行比对的操作
             ActiveAndInitEngines();
             //设置默认照片
-            string filename = m_strPath + @"\default.jpg";
+            string filename = m_strPath + @"\default.gif";
             defaultImage = Image.FromFile(filename);
             this.IDPbox.Image = defaultImage;
         }

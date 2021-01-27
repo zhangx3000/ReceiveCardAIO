@@ -49,7 +49,7 @@
             // 
             // IDPbox
             // 
-            this.IDPbox.Location = new System.Drawing.Point(601, 28);
+            this.IDPbox.Location = new System.Drawing.Point(630, 28);
             this.IDPbox.Name = "IDPbox";
             this.IDPbox.Size = new System.Drawing.Size(147, 174);
             this.IDPbox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
@@ -58,6 +58,7 @@
             // 
             // videoSource
             // 
+            this.videoSource.BorderColor = System.Drawing.Color.White;
             this.videoSource.Location = new System.Drawing.Point(12, 28);
             this.videoSource.Name = "videoSource";
             this.videoSource.Size = new System.Drawing.Size(555, 404);
@@ -69,7 +70,7 @@
             // lbl_msg
             // 
             this.lbl_msg.AutoSize = true;
-            this.lbl_msg.Location = new System.Drawing.Point(599, 420);
+            this.lbl_msg.Location = new System.Drawing.Point(573, 420);
             this.lbl_msg.Name = "lbl_msg";
             this.lbl_msg.Size = new System.Drawing.Size(23, 12);
             this.lbl_msg.TabIndex = 10;
@@ -78,7 +79,7 @@
             // similarity
             // 
             this.similarity.AutoSize = true;
-            this.similarity.Location = new System.Drawing.Point(601, 388);
+            this.similarity.Location = new System.Drawing.Point(573, 390);
             this.similarity.Name = "similarity";
             this.similarity.Size = new System.Drawing.Size(23, 12);
             this.similarity.TabIndex = 11;
@@ -87,7 +88,7 @@
             // lbl_idInfo
             // 
             this.lbl_idInfo.AutoSize = true;
-            this.lbl_idInfo.Location = new System.Drawing.Point(601, 218);
+            this.lbl_idInfo.Location = new System.Drawing.Point(630, 218);
             this.lbl_idInfo.Name = "lbl_idInfo";
             this.lbl_idInfo.Size = new System.Drawing.Size(65, 12);
             this.lbl_idInfo.TabIndex = 12;
@@ -97,7 +98,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(775, 443);
+            this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(8)))), ((int)(((byte)(26)))));
+            this.ClientSize = new System.Drawing.Size(836, 448);
             this.Controls.Add(this.lbl_idInfo);
             this.Controls.Add(this.similarity);
             this.Controls.Add(this.lbl_msg);
