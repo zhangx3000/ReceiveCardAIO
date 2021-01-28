@@ -72,7 +72,6 @@ namespace ReceiveCardAIO
             lbl_msg.Text = (string.Format(text));
         }
 
-
         //第二步：声明一个委托类型的事件
         public event setResultValue setFormResultValue;
         /// <summary>
@@ -137,7 +136,6 @@ namespace ReceiveCardAIO
             combinedMask = FaceEngineMask.ASF_FACERECOGNITION | FaceEngineMask.ASF_FACE3DANGLE | FaceEngineMask.ASF_LIVENESS;
             retCode = ASFFunctions.ASFInitEngine(detectMode, detectFaceOrientPriority, detectFaceScaleVal, detectFaceMaxNum, combinedMask, ref pVideoImageEngine);
             Console.WriteLine("InitVideoEngine Result:" + retCode);
-
 
             if (retCode == 0)
             {

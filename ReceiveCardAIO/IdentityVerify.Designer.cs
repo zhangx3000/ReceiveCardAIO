@@ -58,7 +58,8 @@
             // 
             // videoSource
             // 
-            this.videoSource.BorderColor = System.Drawing.Color.White;
+            this.videoSource.BorderColor = System.Drawing.SystemColors.Highlight;
+            this.videoSource.ForeColor = System.Drawing.SystemColors.Control;
             this.videoSource.Location = new System.Drawing.Point(12, 28);
             this.videoSource.Name = "videoSource";
             this.videoSource.Size = new System.Drawing.Size(555, 404);
@@ -70,6 +71,7 @@
             // lbl_msg
             // 
             this.lbl_msg.AutoSize = true;
+            this.lbl_msg.ForeColor = System.Drawing.SystemColors.Highlight;
             this.lbl_msg.Location = new System.Drawing.Point(573, 420);
             this.lbl_msg.Name = "lbl_msg";
             this.lbl_msg.Size = new System.Drawing.Size(23, 12);
@@ -79,6 +81,7 @@
             // similarity
             // 
             this.similarity.AutoSize = true;
+            this.similarity.ForeColor = System.Drawing.SystemColors.Highlight;
             this.similarity.Location = new System.Drawing.Point(573, 390);
             this.similarity.Name = "similarity";
             this.similarity.Size = new System.Drawing.Size(23, 12);
@@ -88,6 +91,7 @@
             // lbl_idInfo
             // 
             this.lbl_idInfo.AutoSize = true;
+            this.lbl_idInfo.ForeColor = System.Drawing.SystemColors.Highlight;
             this.lbl_idInfo.Location = new System.Drawing.Point(630, 218);
             this.lbl_idInfo.Name = "lbl_idInfo";
             this.lbl_idInfo.Size = new System.Drawing.Size(65, 12);
