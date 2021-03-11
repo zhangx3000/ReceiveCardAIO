@@ -19,11 +19,8 @@ namespace ReceiveCardAIO
     {
         //==========图片引擎Handle
         private IntPtr pImageEngine = IntPtr.Zero;
-        //相似度  阈值设置为0.8
-        private float threshold = 0.7f;
-        //默认显示的照片
-        private Image defaultImage;
-
+        private float threshold = 0.7f;//相似度  阈值设置为0.8
+        private Image defaultImage;//默认显示的照片
         //==========视频引擎Handle
         //视频引擎Handle
         private IntPtr pVideoEngine = IntPtr.Zero;
@@ -320,10 +317,8 @@ namespace ReceiveCardAIO
                                     //将比对结果放到显示消息中，用于最新显示
                                     trackUnit.message = string.Format("通过验证，相似度为{0}", similarity);
                                     FileHelper.DeleteFile(m_strPath);   //删除验证过的本地文件
-                                                                        //延时1秒
-                                    Thread.Sleep(1000);
-                                    //照片恢复默认照片
-                                    this.IDPbox.Image = defaultImage;
+                                    Thread.Sleep(1000);//延时1秒
+                                    this.IDPbox.Image = defaultImage;//照片恢复默认照片
                                     trackUnit.message = "";//人脸识别框文字置空
                                     setFormResultValue(true);
                                 }
@@ -340,7 +335,6 @@ namespace ReceiveCardAIO
                             else
                             {
                                 pass = 0;//标志未通过
-                                         //重置显示消息
                                 trackUnit.message = "未通过人脸验证";
                                 AppendText p = new AppendText(AddTextToMessBox);
                                 lbl_msg.Invoke(p, "抱歉，您未通过人脸验证...\n");

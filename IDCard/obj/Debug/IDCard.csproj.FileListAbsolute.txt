@@ -34,3 +34,12 @@ C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\Receive
 C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\IDCard\obj\Debug\IDCard.csproj.CopyComplete
 C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\IDCard\obj\Debug\IDCard.dll
 C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\IDCard\obj\Debug\IDCard.pdb
+E:\vscode\master\ReceiveCardAIO\IDCard\bin\Debug\IDCard.dll
+E:\vscode\master\ReceiveCardAIO\IDCard\bin\Debug\IDCard.pdb
+E:\vscode\master\ReceiveCardAIO\IDCard\bin\Debug\ArcFaceSharp.dll
+E:\vscode\master\ReceiveCardAIO\IDCard\bin\Debug\ArcFaceSharp.pdb
+E:\vscode\master\ReceiveCardAIO\IDCard\obj\Debug\IDCard.csprojAssemblyReference.cache
+E:\vscode\master\ReceiveCardAIO\IDCard\obj\Debug\IDCard.csproj.CoreCompileInputs.cache
+E:\vscode\master\ReceiveCardAIO\IDCard\obj\Debug\IDCard.csproj.CopyComplete
+E:\vscode\master\ReceiveCardAIO\IDCard\obj\Debug\IDCard.dll
+E:\vscode\master\ReceiveCardAIO\IDCard\obj\Debug\IDCard.pdb

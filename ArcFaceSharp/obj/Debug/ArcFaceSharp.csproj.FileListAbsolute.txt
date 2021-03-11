@@ -22,3 +22,9 @@ C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\Receive
 C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.csproj.CoreCompileInputs.cache
 C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.dll
 C:\Users\Administrator\Desktop\研究项目\物联网\收发卡一体机\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.pdb
+E:\vscode\master\ReceiveCardAIO\ArcFaceSharp\bin\Debug\ArcFaceSharp.dll
+E:\vscode\master\ReceiveCardAIO\ArcFaceSharp\bin\Debug\ArcFaceSharp.pdb
+E:\vscode\master\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.csprojAssemblyReference.cache
+E:\vscode\master\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.csproj.CoreCompileInputs.cache
+E:\vscode\master\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.dll
+E:\vscode\master\ReceiveCardAIO\ArcFaceSharp\obj\Debug\ArcFaceSharp.pdb
