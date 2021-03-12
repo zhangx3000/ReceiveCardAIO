@@ -355,15 +355,12 @@ namespace ReceiveCardAIO
             //销毁引擎
             int retCode = ASFFunctions.ASFUninitEngine(pImageEngine);
             Console.WriteLine("UninitEngine pImageEngine Result:" + retCode);
-
             //销毁引擎
             retCode = ASFFunctions.ASFUninitEngine(pVideoEngine);
             Console.WriteLine("UninitEngine pVideoEngine Result:" + retCode);
-
             //销毁引擎
             retCode = ASFFunctions.ASFUninitEngine(pVideoImageEngine);
             Console.WriteLine("UninitEngine pVideoImageEngine Result:" + retCode);
-
             if (videoSource.IsRunning)
             {
                 videoSource.SignalToStop(); //关闭摄像头
