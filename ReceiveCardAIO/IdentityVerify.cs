@@ -17,58 +17,36 @@ namespace ReceiveCardAIO
     public delegate void setResultValue(bool retValue);
     public partial class IdentityVerify : Form
     {
-        //==========图片引擎Handle
-        private IntPtr pImageEngine = IntPtr.Zero;
+        private IntPtr pImageEngine = IntPtr.Zero;//==========图片引擎Handle
         private float threshold = 0.7f;//相似度  阈值设置为0.8
         private Image defaultImage;//默认显示的照片
         //==========视频引擎Handle
-        //视频引擎Handle
-        private IntPtr pVideoEngine = IntPtr.Zero;
-        //视频引擎 FR Handle 处理   FR和图片引擎分开，减少强占引擎的问题
-        private IntPtr pVideoImageEngine = IntPtr.Zero;
-        //private IntPtr pVideoRGBImageEngine = IntPtr.Zero;//RGB活体检测
-        // 视频输入设备信息
-        private FilterInfoCollection filterInfoCollection;
-        private VideoCaptureDevice deviceVideo;
-        //摄像头每一帧的画面的信息。
-        private FaceTrackUnit trackUnit = new FaceTrackUnit();
-        //定义特定的文本格式，包括字体、字号和样式特性。
-        private Font font = new Font(FontFamily.GenericSerif, 10f);
-        // 定义一种颜色的画笔。 画笔用于填充图形形状，如矩形、 椭圆、 饼、 多边形和路径。
-        private SolidBrush brush = new SolidBrush(Color.Red);
-        //定义用于绘制直线和曲线的对象。
-        private Pen pen = new Pen(Color.Red);
-        //下面用于同步的锁变量
-        private bool isLock = false;
-
+        private IntPtr pVideoEngine = IntPtr.Zero;//视频引擎Handle
+        private IntPtr pVideoImageEngine = IntPtr.Zero;//视频引擎 FR Handle 处理   FR和图片引擎分开，减少强占引擎的问题
+        private FilterInfoCollection filterInfoCollection; // 视频输入设备信息
+        private VideoCaptureDevice deviceVideo;//摄像头每一帧的画面的信息。
+        private FaceTrackUnit trackUnit = new FaceTrackUnit();//视频检测缓存实体类
+        private Font font = new Font(FontFamily.GenericSerif, 10f);//定义特定的文本格式，包括字体、字号和样式特性。
+        private SolidBrush brush = new SolidBrush(Color.Red);// 定义一种颜色的画笔。 画笔用于填充图形形状，如矩形、 椭圆、 饼、 多边形和路径。
+        private Pen pen = new Pen(Color.Red);//定义用于绘制直线和曲线的对象。
+        private bool isLock = false;//下面用于同步的锁变量
         /*
          * 人脸验证的相关参数
          */
-        //人脸识别的次数,大于三次还没有匹配成功就要进行额外的验证
-        private int recTimes = 8;
-        //检测人脸比对的结果是否通过
-        //private bool faceState = false;
-        //检测是否要停止人脸检测
-        private bool faceStop = false;
+        private int recTimes = 8;//人脸识别的次数,大于三次还没有匹配成功就要进行额外的验证
+        private bool faceStop = false;//检测是否要停止人脸检测
         //是否通过闸机
         private int pass = 0; //0 没有通过 1 人脸通过
 
-
         //=====身份证相关
-        //身份证识别帮助类
-        public IDCardHelper idCardHelper;
-        //可执行程序所在的目录
-        private string m_strPath;
-
-        //在线程中向lbl_msg中添加信息的委托
-        private delegate void AppendText(string text);
+        public IDCardHelper idCardHelper;//身份证识别帮助类
+        private string m_strPath;//可执行程序所在的目录
+        private delegate void AppendText(string text);//在线程中向lbl_msg中添加信息的委托
         private void AddTextToMessBox(string text)
         {
             lbl_msg.Text = (string.Format(text));
         }
-
-        //第二步：声明一个委托类型的事件
-        public event setResultValue setFormResultValue;
+        public event setResultValue setFormResultValue; //第二步：声明一个委托类型的事件
         /// <summary>
         /// 激活并初始化引擎
         /// </summary>
@@ -198,7 +176,6 @@ namespace ReceiveCardAIO
             if (videoSource.IsRunning && (idCardHelper.idInfo != null) && (idCardHelper.idInfo.isRight == true))
             {
                 this.IDPbox.Image = idCardHelper.idInfo.image;
-
                 this.lbl_idInfo.Text = idCardHelper.idInfo.name + "\r\n" + idCardHelper.idInfo.sex + "\r\n" + idCardHelper.idInfo.nation + "\r\n" +
                     idCardHelper.idInfo.address + "\r\n" + idCardHelper.idInfo.ID + "\r\n" + idCardHelper.idInfo.org + "\r\n" + idCardHelper.idInfo.vaildity;
 
@@ -208,14 +185,8 @@ namespace ReceiveCardAIO
                     Bitmap bitmap = videoSource.GetCurrentVideoFrame();
                     //传入比对函数中进行比对
                     CompareImgWithIDImg(bitmap, e);
-                    //if (faceState)
-                    //{
-                    //    recTimes = 8;
-                    //    break;
-                    //}
                 }
             }
-            //faceState = false;
             recTimes = 8;
             faceStop = false;
         }
@@ -247,14 +218,8 @@ namespace ReceiveCardAIO
             float height = rect.bottom * offsetY - y;
             //根据Rect进行画框
             g.DrawRectangle(pen, x, y, width, height);
-            //if (trackUnit.message != "" && x > 0 && y > 0)
-            //{
-            //    //将上一帧检测结果显示到页面上
-            //    g.DrawString(trackUnit.message, font, brush, x, y + 5);
-            //}
             //将上一帧检测结果显示到页面上
             g.DrawString(trackUnit.message, font, brush, x, y + 5);
-
             //保证只检测一帧，防止页面卡顿以及出现其他内存被占用情况
             if (isLock == false)
             {
@@ -291,14 +256,12 @@ namespace ReceiveCardAIO
                                     int isLive = MemoryUtil.PtrToStructure<int>(liveInfo.isLive);
                                     isLiveness = (isLive == 1) ? true : false;
                                 }
-                                if (isLiveness)
+                                if (isLiveness)//活体检测成功
                                 {
                                     //存放当前人脸识别的相似度
                                     idCardHelper.idInfo.similarity = similarity;
                                     //记录下当前的摄像头的人脸抓拍照
                                     idCardHelper.idInfo.capImage = bitmap;
-                                    //标志人脸比对验证通过
-                                    //faceState = true;
                                     //验证通过则不再是当前身份证，等待下一次身份证
                                     idCardHelper.idInfo.isRight = false;
                                     //在子线程中输出信息到messageBox
@@ -329,7 +292,6 @@ namespace ReceiveCardAIO
                                     AppendText p = new AppendText(AddTextToMessBox);
                                     lbl_msg.Invoke(p, "抱歉，您未通过人脸验证...\n");
                                     FileHelper.DeleteFile(m_strPath);//删除验证过的本地文件
-                                    //MemoryUtil.Free(imageInfo.imgData);
                                 }
                             }
                             else

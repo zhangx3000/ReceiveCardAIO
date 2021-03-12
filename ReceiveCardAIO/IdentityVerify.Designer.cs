@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(IdentityVerify));
             this.lbl_tip = new System.Windows.Forms.Label();
             this.IDPbox = new System.Windows.Forms.PictureBox();
             this.videoSource = new AForge.Controls.VideoSourcePlayer();
@@ -49,6 +50,7 @@
             // 
             // IDPbox
             // 
+            this.IDPbox.Image = ((System.Drawing.Image)(resources.GetObject("IDPbox.Image")));
             this.IDPbox.Location = new System.Drawing.Point(630, 28);
             this.IDPbox.Name = "IDPbox";
             this.IDPbox.Size = new System.Drawing.Size(147, 174);
